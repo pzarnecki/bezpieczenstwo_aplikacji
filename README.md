@@ -16,7 +16,7 @@ Materiały są publikowane pod adresem:
 
 ## Spis wykładów
 1. **Wykład 1: Krajobraz zagrożeń, anatomia podatności i automatyzacja testów bezpieczeństwa**
-   * [Otwórz prezentację w przeglądarce](wyklad_01/prezentacja/index.html)
+   * [Otwórz prezentację w przeglądarce](wyklady/wyklad01.html)
    * Skrypt akademicki: w opracowaniu (zostanie udostępniony po zakończeniu cyklu wykładów)
    * Zawiera m.in.: analizę incydentu Keurig (1 TB danych), przegląd OWASP Top 10:2025, modelowanie zagrożeń STRIDE, automatyzację SAST/DAST/SCA oraz interaktywną **Listę Grozy: 50 spektakularnych kompromitacji oprogramowania (2020–2026)** z dynamicznym filtrowaniem.
 

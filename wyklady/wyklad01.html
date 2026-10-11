@@ -736,22 +736,84 @@
             font-size: 0.82rem;
             color: #fcd34d;
             font-family: var(--font-sans);
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             animation: moodlePulse 4s ease-in-out infinite alternate;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            position: relative;
+            user-select: none;
         }
 
         .moodle-badge:hover {
             background: rgba(245, 158, 11, 0.15);
             border-color: #f59e0b;
-            transform: scale(1.02);
-            box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+            transform: scale(1.03);
+            box-shadow: 0 0 22px rgba(245, 158, 11, 0.4);
+        }
+
+        .moodle-badge:active {
+            transform: scale(0.97);
         }
 
         .moodle-icon {
             font-size: 1.15rem;
             display: inline-block;
+            transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.25s ease;
             animation: moodleBounce 2.5s ease-in-out infinite;
+        }
+
+        .moodle-badge.pop-heart {
+            border-color: rgba(239, 68, 68, 0.85) !important;
+            background: rgba(239, 68, 68, 0.12) !important;
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.45) !important;
+        }
+
+        .moodle-badge.pop-wink {
+            border-color: rgba(245, 158, 11, 0.85) !important;
+            background: rgba(245, 158, 11, 0.14) !important;
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.45) !important;
+        }
+
+        .floating-reaction {
+            position: fixed;
+            pointer-events: none;
+            font-size: 2.8rem;
+            z-index: 999999;
+            user-select: none;
+            filter: drop-shadow(0 6px 16px rgba(0,0,0,0.85));
+            animation: floatUpReaction 1.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes floatUpReaction {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, 20px) scale(0.4) rotate(0deg);
+            }
+            15% {
+                opacity: 1;
+                transform: translate(calc(-50% + var(--shift-x, 0px)), -40px) scale(1.5) rotate(var(--rot, 0deg));
+            }
+            75% {
+                opacity: 0.95;
+                transform: translate(calc(-50% + var(--shift-x, 0px)), -120px) scale(1.3) rotate(calc(var(--rot, 0deg) * -0.7));
+            }
+            100% {
+                opacity: 0;
+                transform: translate(calc(-50% + var(--shift-x, 0px)), -190px) scale(0.9) rotate(calc(var(--rot, 0deg) * 1.2));
+            }
+        }
+            15% {
+                opacity: 1;
+                transform: translate(calc(-50% + var(--shift-x, 0px)), -40px) scale(1.5) rotate(var(--rot, 0deg));
+            }
+            75% {
+                opacity: 0.95;
+                transform: translate(calc(-50% + var(--shift-x, 0px)), -120px) scale(1.3) rotate(calc(var(--rot, 0deg) * -0.7));
+            }
+            100% {
+                opacity: 0;
+                transform: translate(calc(-50% + var(--shift-x, 0px)), -190px) scale(0.9) rotate(calc(var(--rot, 0deg) * 1.2));
+            }
         }
 
         .moodle-sub {
@@ -937,7 +999,7 @@
         <!-- SLAJD 1: TYTUŁOWY -->
         <section class="slide active" data-title="Strona tytułowa" id="slide-1">
             <div class="slide-page title-slide">
-                <img src="../obrazy/logo_merito.png" alt="Uniwersytet WSB Merito" class="title-logo">
+                <img src="obrazy/logo_merito.png" alt="Uniwersytet WSB Merito" class="title-logo">
                 <h1 class="title-main">Bezpieczeństwo Aplikacji</h1>
                 <p class="title-sub">Wykład 1: Krajobraz współczesnych zagrożeń, anatomia podatności i zautomatyzowane testowanie kodu</p>
                 
@@ -966,10 +1028,10 @@
                     <div>GitHub Pages: <a href="https://pzarnecki.github.io/bezpieczenstwo_aplikacji/" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600;">https://pzarnecki.github.io/bezpieczenstwo_aplikacji/ ↗</a></div>
                 </div>
 
-                <!-- Komunikat o Moodle z animacją -->
-                <div class="moodle-badge" title="Moodle uczelniany">
-                    <span class="moodle-icon">🎓</span>
-                    <span>Oficjalnie: Wszystkie materiały formalnie znajdują się na platformie <strong>Moodle</strong>.</span>
+                <!-- Komunikat o Moodle z interaktywną reakcją -->
+                <div class="moodle-badge" id="moodle-badge-el" title="Kliknij Moodle ;)" onclick="triggerMoodleReaction(event)">
+                    <span class="moodle-icon" id="moodle-icon-el">🎓</span>
+                    <span id="moodle-text-el">Oficjalnie: Wszystkie materiały formalnie znajdują się na platformie <strong style="text-decoration: underline dotted rgba(245,158,11,0.6);">Moodle</strong>.</span>
                 </div>
             </div>
         </section>
@@ -986,7 +1048,7 @@
                 <div class="slide-content">
                     <div class="grid-2">
                         <div class="image-frame">
-                            <img src="../obrazy/ekspres_ithardware.jpg" alt="Ekspres do kawy Keurig">
+                            <img src="obrazy/ekspres_ithardware.jpg" alt="Ekspres do kawy Keurig">
                             <div class="image-caption">Fot. ITHardware.pl / Przypadek inteligentnego ekspresu Keurig podłączonego do domowego Wi-Fi</div>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 12px;">
@@ -2228,6 +2290,88 @@ jobs:
                     counter.textContent = `Widoczne: ${count} z ${rows.length}`;
                 }
             };
+
+            // Moodle Easter Egg Interactive Reaction
+            let moodleTimer1 = null;
+            let moodleTimer2 = null;
+            window.triggerMoodleReaction = function(e) {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                const badge = document.getElementById('moodle-badge-el');
+                const icon = document.getElementById('moodle-icon-el');
+                const text = document.getElementById('moodle-text-el');
+                if (!badge) return;
+
+                if (moodleTimer1) clearTimeout(moodleTimer1);
+                if (moodleTimer2) clearTimeout(moodleTimer2);
+
+                // Krok 1: Serduszko ❤️
+                if (icon) {
+                    icon.textContent = '❤️';
+                    icon.style.animation = 'none';
+                    icon.style.transform = 'scale(1.65)';
+                    icon.style.filter = 'drop-shadow(0 0 16px rgba(239, 68, 68, 0.95))';
+                }
+                badge.classList.remove('pop-wink');
+                badge.classList.add('pop-heart');
+                if (text) {
+                    text.innerHTML = 'Oficjalnie: Wszystkie materiały formalnie na platformie <strong>Moodle</strong> ❤️';
+                }
+
+                spawnFloatingReaction(badge, '❤️', -30, -15);
+                setTimeout(() => spawnFloatingReaction(badge, '❤️', 5, 10), 140);
+
+                // Krok 2: Po chwili (700 ms) przymrużone oko 😉
+                moodleTimer1 = setTimeout(() => {
+                    if (icon) {
+                        icon.textContent = '😉';
+                        icon.style.transform = 'scale(1.5) rotate(12deg)';
+                        icon.style.filter = 'drop-shadow(0 0 16px rgba(245, 158, 11, 0.95))';
+                    }
+                    badge.classList.remove('pop-heart');
+                    badge.classList.add('pop-wink');
+                    if (text) {
+                        text.innerHTML = 'Oficjalnie: Wszystkie materiały formalnie na platformie <strong>Moodle</strong> 😉';
+                    }
+                    spawnFloatingReaction(badge, '😉', 30, 15);
+                    setTimeout(() => spawnFloatingReaction(badge, '😉', -5, -8), 140);
+                }, 700);
+
+                // Krok 3: Płynny powrót do oficjalnego akademickiego biretu 🎓
+                moodleTimer2 = setTimeout(() => {
+                    if (icon) {
+                        icon.textContent = '🎓';
+                        icon.style.transform = '';
+                        icon.style.filter = '';
+                        icon.style.animation = '';
+                    }
+                    badge.classList.remove('pop-heart', 'pop-wink');
+                    if (text) {
+                        text.innerHTML = 'Oficjalnie: Wszystkie materiały formalnie znajdują się na platformie <strong style="text-decoration: underline dotted rgba(245,158,11,0.6);">Moodle</strong>.';
+                    }
+                }, 2700);
+            };
+
+            function spawnFloatingReaction(badge, emoji, offsetX, rotDeg) {
+                const rect = badge.getBoundingClientRect();
+                const bubble = document.createElement('div');
+                bubble.className = 'floating-reaction';
+                bubble.textContent = emoji;
+                bubble.style.position = 'fixed';
+                bubble.style.left = `${rect.left + rect.width / 2 + offsetX}px`;
+                bubble.style.top = `${rect.top - 15}px`;
+                bubble.style.setProperty('--shift-x', `${offsetX * 1.8}px`);
+                bubble.style.setProperty('--rot', `${rotDeg}deg`);
+                document.body.appendChild(bubble);
+                setTimeout(() => bubble.remove(), 1900);
+            }
+
+            const moodleBtn = document.getElementById('moodle-badge-el');
+            if (moodleBtn) {
+                moodleBtn.addEventListener('click', window.triggerMoodleReaction);
+            }
 
             updateUI();
         })();
