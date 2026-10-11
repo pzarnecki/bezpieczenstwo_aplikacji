@@ -1,0 +1,9 @@
+# System files
+.DS_Store
+Thumbs.db
+
+# Temporary LaTeX files if any
+*.aux
+*.log
+*.out
+*.toc

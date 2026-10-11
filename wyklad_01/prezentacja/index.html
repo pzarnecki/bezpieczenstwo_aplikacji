@@ -1,0 +1,2175 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wykład 1: Krajobraz zagrożeń i testowanie bezpieczeństwa | Bezpieczeństwo Aplikacji</title>
+    <style>
+        :root {
+            --bg-main: #0b0f19;
+            --bg-card: #131b2e;
+            --bg-card-hover: #1a253f;
+            --border: #23314f;
+            --border-accent: #006efa;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --merito-blue: #006efa;
+            --merito-navy: #141e50;
+            --merito-navy-dark: #090e23;
+            --accent-cyan: #38bdf8;
+            --accent-red: #f43f5e;
+            --accent-green: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-purple: #a855f7;
+            --code-bg: #070a12;
+            --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, Monaco, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Top Progress Bar */
+        #progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            z-index: 100;
+        }
+
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--merito-blue), var(--accent-cyan));
+            box-shadow: 0 0 10px rgba(0, 110, 250, 0.6);
+            transition: width 0.3s ease;
+        }
+
+        /* Slide Viewport */
+        #presentation {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 60px);
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 0 60px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.35s ease, transform 0.35s ease;
+            transform: scale(0.98);
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        .slide::-webkit-scrollbar {
+            width: 8px;
+        }
+        .slide::-webkit-scrollbar-track {
+            background: rgba(11, 15, 25, 0.5);
+        }
+        .slide::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+        .slide::-webkit-scrollbar-thumb:hover {
+            background: var(--merito-blue);
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+
+        /* Slide Fullpage Sections: Main Page & Drilldown Sub-page */
+        .slide-page {
+            min-height: calc(100vh - 60px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 35px 0 25px 0;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .drilldown-page {
+            min-height: calc(100vh - 60px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 40px 0 30px 0;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        /* Slide Header */
+        .slide-header {
+            margin-bottom: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .slide-tag {
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-cyan);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .slide-tag::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--merito-blue);
+        }
+
+        .slide-title {
+            font-size: 2.15rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+        }
+
+        .slide-subtitle {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            margin-top: 3px;
+        }
+
+        /* Content layouts */
+        .slide-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 26px;
+            align-items: stretch;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        /* Cards & Boxes */
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 22px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            transition: border-color 0.2s ease, transform 0.2s ease;
+            position: relative;
+        }
+
+        .card:hover {
+            border-color: rgba(0, 110, 250, 0.5);
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-body {
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+            line-height: 1.55;
+        }
+
+        .card-body p + p {
+            margin-top: 8px;
+        }
+
+        /* Danger / Accent Cards */
+        .card-danger {
+            border-left: 4px solid var(--accent-red);
+        }
+
+        .card-primary {
+            border-left: 4px solid var(--merito-blue);
+        }
+
+        .card-success {
+            border-left: 4px solid var(--accent-green);
+        }
+
+        .card-amber {
+            border-left: 4px solid var(--accent-amber);
+        }
+
+        .card-purple {
+            border-left: 4px solid var(--accent-purple);
+        }
+
+        /* Callout quotes */
+        .quote-box {
+            background: linear-gradient(135deg, rgba(20, 30, 80, 0.6) 0%, rgba(11, 15, 25, 0.9) 100%);
+            border-left: 4px solid var(--merito-blue);
+            border-radius: 0 12px 12px 0;
+            padding: 18px 22px;
+            font-size: 1.05rem;
+            font-style: italic;
+            color: #e2e8f0;
+            line-height: 1.55;
+        }
+
+        .quote-source {
+            display: block;
+            margin-top: 6px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            font-style: normal;
+            font-weight: 600;
+        }
+
+        /* Drilldown Navigation Action Buttons */
+        .drilldown-action-bar {
+            margin-top: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .drill-btn {
+            background: rgba(0, 110, 250, 0.12);
+            border: 1px solid rgba(0, 110, 250, 0.4);
+            color: var(--accent-cyan);
+            padding: 9px 24px;
+            border-radius: 30px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+        }
+
+        .drill-btn:hover {
+            background: var(--merito-blue);
+            color: #ffffff;
+            border-color: var(--merito-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 110, 250, 0.4);
+        }
+
+        .drilldown-sub-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0, 110, 250, 0.08);
+            border-left: 4px solid var(--merito-blue);
+            padding: 12px 20px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 20px;
+        }
+
+        .drilldown-sub-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .back-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--accent-cyan);
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .back-btn:hover {
+            background: var(--merito-blue);
+            color: white;
+            border-color: var(--merito-blue);
+        }
+
+        /* Lista Grozy (50 aplikacji) styles */
+        .grozy-container {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 22px;
+            margin-top: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        }
+
+        .grozy-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .grozy-title-block h3 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--accent-red);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+        }
+
+        .grozy-title-block p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 4px 0 0 0;
+        }
+
+        .grozy-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .grozy-search-input {
+            width: 100%;
+            background: #090d16;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 0.88rem;
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            outline: none;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        .grozy-search-input:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+        }
+
+        .grozy-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .grozy-pill {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 5px 12px;
+            border-radius: 18px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .grozy-pill:hover {
+            border-color: var(--accent-cyan);
+            color: var(--text-primary);
+        }
+
+        .grozy-pill.active {
+            background: var(--merito-blue);
+            border-color: var(--merito-blue);
+            color: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 110, 250, 0.4);
+        }
+
+        .grozy-counter {
+            font-size: 0.82rem;
+            font-family: var(--font-mono);
+            color: var(--accent-cyan);
+            margin-left: auto;
+        }
+
+        .grozy-table-wrapper {
+            max-height: 520px;
+            overflow-y: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #0b0f19;
+        }
+
+        .grozy-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+
+        .grozy-table th {
+            position: sticky;
+            top: 0;
+            background: #111827;
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 11px 13px;
+            border-bottom: 2px solid var(--border);
+            z-index: 2;
+        }
+
+        .grozy-table td {
+            padding: 10px 13px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            vertical-align: middle;
+        }
+
+        .grozy-table tr:hover td {
+            background: rgba(0, 110, 250, 0.06);
+            color: var(--text-primary);
+        }
+
+        .badge-cat {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .badge-cat-mobile { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .badge-cat-desktop { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .badge-cat-saas { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+        .badge-cat-infra { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+        .badge-cat-supply { background: rgba(236, 72, 153, 0.15); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.3); }
+
+        /* Terminal code snippets */
+        .terminal {
+            background: var(--code-bg);
+            border: 1px solid #1e293b;
+            border-radius: 10px;
+            overflow: hidden;
+            font-family: var(--font-mono);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .terminal-header {
+            background: #0f172a;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .terminal-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .dot-red { background: #ef4444; }
+        .dot-yellow { background: #eab308; }
+        .dot-green { background: #22c55e; }
+
+        .terminal-title {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .terminal-body {
+            padding: 14px 18px;
+            font-size: 0.86rem;
+            line-height: 1.55;
+            color: #e2e8f0;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+
+        .terminal-cmd {
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        .terminal-param {
+            color: #f59e0b;
+        }
+
+        .terminal-comment {
+            color: #64748b;
+        }
+
+        .terminal-output {
+            color: #94a3b8;
+        }
+
+        /* Image containers */
+        .image-frame {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            position: relative;
+            background: #0f172a;
+        }
+
+        .image-frame img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+        }
+
+        .image-caption {
+            padding: 9px 12px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            background: rgba(15, 23, 42, 0.95);
+            border-top: 1px solid var(--border);
+        }
+
+        /* Tables */
+        .custom-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.88rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .custom-table th {
+            background: rgba(0, 110, 250, 0.12);
+            color: var(--accent-cyan);
+            font-weight: 700;
+            text-align: left;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .custom-table td {
+            padding: 10px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .custom-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .custom-table tr:hover td {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-primary);
+        }
+
+        .row-interactive {
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .row-interactive:hover td {
+            background: rgba(0, 110, 250, 0.14) !important;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.78rem;
+            font-family: var(--font-mono);
+        }
+
+        .badge-red { background: rgba(244, 63, 94, 0.2); color: #fda4af; border: 1px solid rgba(244, 63, 94, 0.4); }
+        .badge-blue { background: rgba(0, 110, 250, 0.2); color: #93c5fd; border: 1px solid rgba(0, 110, 250, 0.4); }
+        .badge-amber { background: rgba(245, 158, 11, 0.2); color: #fde68a; border: 1px solid rgba(245, 158, 11, 0.4); }
+        .badge-green { background: rgba(16, 185, 129, 0.2); color: #a7f3d0; border: 1px solid rgba(16, 185, 129, 0.4); }
+        .badge-purple { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.4); }
+
+        /* Title Slide Custom */
+        .title-slide {
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .title-logo {
+            max-width: 250px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 4px 12px rgba(0, 110, 250, 0.2));
+        }
+
+        .title-main {
+            font-size: 3.3rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #ffffff 30%, #93c5fd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+        }
+
+        .title-sub {
+            font-size: 1.3rem;
+            color: var(--accent-cyan);
+            font-weight: 600;
+            max-width: 820px;
+            line-height: 1.4;
+            margin-bottom: 28px;
+        }
+
+        .title-meta {
+            display: flex;
+            gap: 36px;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border);
+            padding-top: 22px;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            text-align: center;
+        }
+
+        .meta-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+
+        .meta-val {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Bottom Controls Bar */
+        #bottom-bar {
+            height: 60px;
+            background: #090d16;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            z-index: 90;
+        }
+
+        .bar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .bar-badge {
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+
+        .bar-center {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 7px 14px;
+            border-radius: 6px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-btn:hover {
+            background: var(--merito-blue);
+            border-color: var(--merito-blue);
+        }
+
+        .bar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 0.9rem;
+            font-family: var(--font-mono);
+            color: var(--text-secondary);
+        }
+
+        .shortcut-hint {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Overview Grid Overlay */
+        #overview-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(7, 10, 18, 0.95);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            padding: 40px;
+            overflow-y: auto;
+            display: none;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        #overview-modal.open {
+            display: flex;
+        }
+
+        .overview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+        }
+
+        .overview-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .overview-thumb {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 130px;
+        }
+
+        .overview-thumb:hover {
+            border-color: var(--merito-blue);
+            transform: translateY(-2px);
+        }
+
+        .overview-thumb.active {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+        }
+
+        .thumb-num {
+            font-size: 0.8rem;
+            font-family: var(--font-mono);
+            color: var(--accent-cyan);
+        }
+
+        .thumb-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Progress Indicator -->
+    <div id="progress-container">
+        <div id="progress-bar"></div>
+    </div>
+
+    <!-- Presentation Viewport -->
+    <main id="presentation">
+
+        <!-- SLAJD 1: TYTUŁOWY -->
+        <section class="slide active" data-title="Strona tytułowa" id="slide-1">
+            <div class="slide-page title-slide">
+                <img src="../obrazy/logo_merito.png" alt="Uniwersytet WSB Merito" class="title-logo">
+                <h1 class="title-main">Bezpieczeństwo Aplikacji</h1>
+                <p class="title-sub">Wykład 1: Krajobraz współczesnych zagrożeń, anatomia podatności i zautomatyzowane testowanie kodu</p>
+                
+                <div class="title-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">Uczelnia</span>
+                        <span class="meta-val">Uniwersytet WSB Merito we Wrocławiu</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Kierunek i stopień</span>
+                        <span class="meta-val">Informatyka, Studia II stopnia (magisterskie)</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Wykładowca</span>
+                        <span class="meta-val">mgr Przemysław Żarnecki</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Semestr</span>
+                        <span class="meta-val">Zimowy 2026 / 2027</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 24px; font-family: var(--font-mono); font-size: 0.84rem; display: flex; flex-direction: column; gap: 6px; align-items: center;">
+                    <div>📦 Repozytorium Git: <span style="color: var(--accent-cyan); font-weight: 600;">https://dev.zarnecki.org/Merito/bezpieczenstwo_aplikacji.git</span></div>
+                    <div>☁️ Chmura Nextcloud: <a href="https://chmura.zarnecki.org/s/iLdT3J5YGTTYCPr" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600;">https://chmura.zarnecki.org/s/iLdT3J5YGTTYCPr ↗</a></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLAJD 2: HUMOR / INCYDENT EKSPRESU -->
+        <section class="slide" data-title="Poranny alarm: 1 TB z ekspresu" id="slide-2">
+            <!-- Strona 1: Czysty slajd główny z ekspresem i kafelkami -->
+            <div class="slide-page" id="slide-2-main">
+                <div class="slide-header">
+                    <span class="slide-tag">Wprowadzenie do rzeczywistości</span>
+                    <h2 class="slide-title">„Kochanie, czy nasz ekspres do kawy właśnie pinguje Chiny?”</h2>
+                    <p class="slide-subtitle">Prawdziwy incydent z października 2026 roku: kiedy AGD zaczyna żyć własnym życiem sieciowym</p>
+                </div>
+                <div class="slide-content">
+                    <div class="grid-2">
+                        <div class="image-frame">
+                            <img src="../obrazy/ekspres_ithardware.jpg" alt="Ekspres do kawy Keurig">
+                            <div class="image-caption">Fot. ITHardware.pl / Przypadek inteligentnego ekspresu Keurig podłączonego do domowego Wi-Fi</div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <div class="quote-box" style="padding: 14px 18px;">
+                                „Właściciel urządzenia zauważył w statystykach domowego routera brzegowego, że w ciągu zaledwie 10 dni jego inteligentny ekspres do kawy przetransferował do Internetu około 1 TB danych i pobrał niemal 10 GB...”
+                                <span class="quote-source">Źródło: Raporty branżowe / ITHardware.pl (Październik 2026)</span>
+                            </div>
+                            <div class="card card-danger" style="padding: 14px 18px;">
+                                <div class="card-title" style="font-size: 1.05rem;">Pytanie na rozgrzewkę do sali:</div>
+                                <div class="card-body" style="font-size: 0.88rem;">
+                                    Czy ekspres pobierał instrukcje parzenia kawy w bezstratnym wideo 8K?<br>
+                                    <strong>Absolutnie nie.</strong> Urządzenie zostało przejęte przez zautomatyzowane boty skanujące sieć i włączone w skład globalnego botnetu.
+                                </div>
+                            </div>
+                            <div class="card card-primary" style="padding: 14px 18px; cursor: pointer;" onclick="scrollToElement('slide-2', 'wpadki-2026')">
+                                <div class="card-title" style="font-size: 1.05rem; color: var(--accent-cyan);">Nie tylko ekspresy: Wpadki aplikacji 2025/2026</div>
+                                <div class="card-body" style="font-size: 0.88rem;">
+                                    Masowe wycieki z baz Firebase w aplikacjach mobilnych, zdalne wykonanie kodu (RCE) w desktopowym Electronie oraz paraliż łańcucha dostaw. Zobacz szczegółowe przykłady.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="drilldown-action-bar">
+                    <button class="drill-btn" onclick="scrollToElement('slide-2', 'wpadki-2026')">
+                        🔥 Przejdź do przykładów ze świata i Listy Grozy (50 aplikacji) ↓
+                    </button>
+                </div>
+            </div>
+
+            <!-- Strona 2: Osobny, pełnoekranowy widok wpadek 2025/2026 -->
+            <div class="drilldown-page" id="wpadki-2026">
+                <div class="drilldown-sub-header">
+                    <span class="drilldown-sub-title">Przykłady ze świata: Wpadki aplikacji mobilnych, desktopowych i chmurowych (2025 / 2026)</span>
+                    <button class="back-btn" onclick="scrollToElement('slide-2', 'slide-2-main')">↑ Wróć do ekspresu</button>
+                </div>
+                <div class="grid-3">
+                    <div class="card card-danger">
+                        <div class="card-title" style="color: var(--accent-red); font-size: 1.05rem;">1. Aplikacje mobilne (Android/iOS)</div>
+                        <div class="card-body" style="font-size: 0.88rem;">
+                            <strong>Masowe wycieki z baz Firebase & Firestore:</strong><br>
+                            Raporty z lat 2025/2026 ujawniły ponad 150 popularnych aplikacji mobilnych (łącznie ponad 100M pobrań) z regułą <code>allow read: if true</code> pozostawioną w środowisku produkcyjnym.<br><br>
+                            <strong>Skutek:</strong> Publiczny wyciek milionów czatów, dokumentów tożsamości, haseł jawnym tekstem oraz kluczy do AWS/GitHub.<br><br>
+                            <strong>Luki Deep Links:</strong> Brak sanityzacji schematów URL w aplikacjach mobilnych pozwalał obcym witrynom przejmować sesje w tle.
+                        </div>
+                    </div>
+
+                    <div class="card card-amber">
+                        <div class="card-title" style="color: var(--accent-amber); font-size: 1.05rem;">2. Aplikacje desktopowe (Electron)</div>
+                        <div class="card-body" style="font-size: 0.88rem;">
+                            <strong>Zdalne wykonanie kodu (RCE) przez protokoły URL:</strong><br>
+                            Aplikacje desktopowe (komunikatory i narzędzia biurowe oparte na Electronie) rejestrują w systemie Windows/macOS protokoły typu <code>app://</code>.<br><br>
+                            <strong>Mechanizm podatności (CVE-2026-34767):</strong> Wstrzyknięcie argumentów do Chromium (np. <code>--no-sandbox</code>) przez spreparowany odnośnik webowy.<br><br>
+                            <strong>Skutek:</strong> Kliknięcie linku na stronie www uruchamiało lokalną aplikację desktopową i wykonywało złośliwy kod na komputerze użytkownika.
+                        </div>
+                    </div>
+
+                    <div class="card card-purple">
+                        <div class="card-title" style="color: var(--accent-purple); font-size: 1.05rem;">3. Chmura i łańcuch dostaw</div>
+                        <div class="card-body" style="font-size: 0.88rem;">
+                            <strong>Paraliż infrastruktury i zatrute biblioteki:</strong><br>
+                            <strong>CrowdStrike Falcon:</strong> Błąd walidacji pliku konfiguracyjnego w sterowniku doprowadził do BSOD na 8.5 mln maszyn (lotniska, banki, szpitale). Lekcja: brak testów kanarkowych i brak walidacji wejścia w komponencie krytycznym.<br><br>
+                            <strong>Atak Polyfill.io:</strong> Przejęcie domeny popularnej biblioteki JavaScript i wstrzyknięcie złośliwego kodu do ponad 100 000 serwisów internetowych.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-primary" style="margin-top: 14px; padding: 14px 22px; background: rgba(0, 110, 250, 0.08);">
+                    <div class="card-body" style="font-size: 0.92rem; text-align: center;">
+                        <strong>Wspólny mianownik:</strong> Żadna z tych katastrof nie wymagała łamania algorytmów kryptograficznych. Wszystkie wynikały z: błędnej konfiguracji uprawnień, braku walidacji parametrów wejściowych oraz ślepego zaufania do zewnętrznego kodu.
+                    </div>
+                </div>
+
+                <!-- LISTA GROZY: 50 SPEKTAKULARNYCH KOMPROMITACJI (2020-2026) -->
+                <div class="grozy-container" id="lista-grozy">
+                    <div class="grozy-header">
+                        <div class="grozy-title-block">
+                            <h3>☠️ Lista Grozy: 50 spektakularnych kompromitacji oprogramowania (2020–2026)</h3>
+                            <p>Rzeczywiste studia przypadków: od błędów autoryzacji w API i kompromitacji pamięci po zatruty łańcuch dostaw open-source</p>
+                        </div>
+                        <button class="back-btn" onclick="scrollToElement('slide-2', 'slide-2-main')">↑ Wróć na początek slajdu</button>
+                    </div>
+
+                    <div class="grozy-controls">
+                        <div class="grozy-search-box">
+                            <input type="text" id="grozy-search" class="grozy-search-input" placeholder="🔍 Szukaj w 50 aplikacjach (wpisz np. WhatsApp, Electron, RCE, Firebase, IDOR, npm, 2024)..." oninput="window.applyGrozyFilter()">
+                        </div>
+                        <div class="grozy-filters">
+                            <button class="grozy-pill active" data-cat="all" onclick="window.filterGrozy('all')">Wszystkie (50)</button>
+                            <button class="grozy-pill" data-cat="mobile" onclick="window.filterGrozy('mobile')">📱 Mobilne (10)</button>
+                            <button class="grozy-pill" data-cat="desktop" onclick="window.filterGrozy('desktop')">💻 Desktop (10)</button>
+                            <button class="grozy-pill" data-cat="saas" onclick="window.filterGrozy('saas')">🌐 Web & SaaS (10)</button>
+                            <button class="grozy-pill" data-cat="infra" onclick="window.filterGrozy('infra')">🏢 Infra & Chmura (10)</button>
+                            <button class="grozy-pill" data-cat="supply" onclick="window.filterGrozy('supply')">📦 Łańcuch dostaw (10)</button>
+                            <span class="grozy-counter" id="grozy-counter">Widoczne: 50 z 50 aplikacji</span>
+                        </div>
+                    </div>
+
+                    <div class="grozy-table-wrapper">
+                        <table class="grozy-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 45px;">#</th>
+                                    <th style="width: 170px;">Aplikacja / Usługa</th>
+                                    <th style="width: 120px;">Kategoria</th>
+                                    <th style="width: 140px;">Rok / Identyfikator</th>
+                                    <th style="width: 320px;">Wektor podatności & Mechanizm błędu</th>
+                                    <th>Skutki i skala incydentu</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="grozy-row" data-cat="mobile"><td>01</td><td><strong>TikTok</strong></td><td><span class="badge-cat badge-cat-mobile">Mobilne</span></td><td>2022 / CVE-2022-28799</td><td>1-kliknięciowe przejęcie konta przez spreparowany Deep Link wywołujący nieautoryzowany WebView JS bridge</td><td>Kradzież sesji, podmiana wideo i dostęp do prywatnych wiadomości milionów kont</td></tr>
+                                <tr class="grozy-row" data-cat="mobile"><td>02</td><td><strong>WhatsApp</strong></td><td><span class="badge-cat badge-cat-mobile">Mobilne</span></td><td>2022 / CVE-2022-36934</td><td>Integer overflow w bibliotece dekodowania wideo (Zero-Click RCE podczas nawiązywania połączenia)</td><td>Zdalne wykonanie kodu na smartfonie ofiary bez konieczności odbierania rozmowy</td></tr>
+                                <tr class="grozy-row" data-cat="mobile"><td>03</td><td><strong>Telegram (Android)</strong></td><td><span class="badge-cat badge-cat-mobile">Mobilne</span></td><td>2024 / CVE-2024-34475</td><td>Błąd parsera plików ("EvilVideo"); spreparowany pakiet APK maskowany jako wideo z automatycznym podglądem</td><td>Pobranie i instalacja złośliwego oprogramowania na urządzeniu po 1 kliknięciu w czacie</td></tr>
+                                <tr class="grozy-row" data-cat="mobile"><td>04</td><td><strong>Clubhouse</strong></td><td><span class="badge-cat badge-cat-mobile">Mobilne</span></td><td>2021 / API Scraping</td><td>Publiczny endpoint REST API pozbawiony limitu zapytań (Rate Limiting) i tokenów anty-botowych</td><td>Masowy scraping bazy 1.3 mln użytkowników, numerów telefonów i powiązań społecznościowych</td></tr>
+                                <tr class="grozy-row" data-cat="mobile"><td>05</td><td><strong>Instagram (Meta)</strong></td><td><span class="badge-cat badge-cat-mobile">Mobilne</span></td><td>2023 / Błąd API 2FA</td><td>Brak limitu prób (rate limiting) na endpointach API weryfikacji 6-cyfrowego kodu SMS przy resetowaniu 2FA</td><td>Możliwość brute-force'u kodu weryfikacyjnego i przejęcia dowolnego profilu bez hasła</td></tr>
+                                <tr class="grozy-row" data-cat="mobile"><td>06</td><td><strong>23andMe</strong></td><td><span class="badge-cat badge-cat-mobile">Mobilne / SaaS</span></td><td>2023 / Credential Stuffing</td><td>Atak wypychania poświadczeń + funkcja "DNA Relatives" bez segmentacji uprawnień (BOLA)</td><td>Eksfiltracja danych genetycznych, pochodzenia etnicznego i genealogii 6.9 mln osób</td></tr>
+                                <tr class="grozy-row" data-cat="mobile"><td>07</td><td><strong>Duolingo</strong></td><td><span class="badge-cat badge-cat-mobile">Mobilne</span></td><td>2023 / API Exposure</td><td>Publiczny endpoint API synchronizacji kontaktów dostępny bez uwierzytelnienia</td><td>Pobranie i wyciek bazy 2.6 mln kont powiązanych z realnymi adresami e-mail i telefonami</td></tr>
+                                <tr class="grozy-row" data-cat="mobile"><td>08</td><td><strong>Strava</strong></td><td><span class="badge-cat badge-cat-mobile">Mobilne</span></td><td>2024 / Błąd anonimizacji</td><td>Globalna funkcja Heatmap i publiczne tablice segmentów biegowych ujawniające precyzyjne ścieżki GPS</td><td>Deanonimizacja tajnych placówek wojskowych w Syrii oraz tras biegowych ochrony przywódców państw</td></tr>
+                                <tr class="grozy-row" data-cat="mobile"><td>09</td><td><strong>ParkMobile</strong></td><td><span class="badge-cat badge-cat-mobile">Mobilne</span></td><td>2021 / API Vulnerability</td><td>Brak autoryzacji w zewnętrznym API backendu aplikacji mobilnej</td><td>Kradzież bazy danych 21 mln kierowców: numery rejestracyjne, maile, telefony, hasła bcrypt</td></tr>
+                                <tr class="grozy-row" data-cat="mobile"><td>10</td><td><strong>Signal (Android/iOS)</strong></td><td><span class="badge-cat badge-cat-mobile">Mobilne</span></td><td>2020 / CVE-2020-6514</td><td>Błędy w parsowaniu strumieni WebRTC w silniku zestawiania połączeń</td><td>Potencjalne wycieki metadanych i anomalie pamięci w komunikacji peer-to-peer</td></tr>
+                                <tr class="grozy-row" data-cat="desktop"><td>11</td><td><strong>Discord</strong></td><td><span class="badge-cat badge-cat-desktop">Desktop</span></td><td>2023 / Electron RCE</td><td>Ominięcie reguł contextIsolation i podatność odtwarzacza multimediów przez protokoły niestandardowe</td><td>Zdalne wykonanie kodu na maszynie gracza po kliknięciu linku ze spreparowanym protokołem</td></tr>
+                                <tr class="grozy-row" data-cat="desktop"><td>12</td><td><strong>Slack Desktop</strong></td><td><span class="badge-cat badge-cat-desktop">Desktop</span></td><td>2023 / Session Token Theft</td><td>Przechowywanie nieszyfrowanych tokenów sesyjnych xoxc- w lokalnej pamięci podręcznej i błędy webhooków</td><td>Wykradzenie tokenów z lokalnych dysków i kradzież prywatnych repozytoriów kodu źródłowego</td></tr>
+                                <tr class="grozy-row" data-cat="desktop"><td>13</td><td><strong>Zoom</strong></td><td><span class="badge-cat badge-cat-desktop">Desktop</span></td><td>2020 / CVE-2020-6109</td><td>Wstrzyknięcie ścieżek UNC w oknie czatu + brak obiecywanego pełnego szyfrowania E2E</td><td>Kradzież skrótów NTLM użytkowników systemu Windows po najechaniu na odnośnik w trakcie spotkania</td></tr>
+                                <tr class="grozy-row" data-cat="desktop"><td>14</td><td><strong>Microsoft Teams</strong></td><td><span class="badge-cat badge-cat-desktop">Desktop</span></td><td>2023 / CVE-2023-33215</td><td>Błąd weryfikacji tokenów w integracji z kontami zewnętrznymi w kliencie desktopowym</td><td>Możliwość podszywania się napastników spoza organizacji pod wewnętrznych pracowników</td></tr>
+                                <tr class="grozy-row" data-cat="desktop"><td>15</td><td><strong>AnyDesk</strong></td><td><span class="badge-cat badge-cat-desktop">Desktop</span></td><td>2024 / Supply Chain</td><td>Włamanie do systemów produkcyjnych i kradzież prywatnego certyfikatu podpisywania kodu źródłowego</td><td>Wymuszenie unieważnienia wszystkich certyfikatów i pilna aktualizacja binariów u milionów użytkowników</td></tr>
+                                <tr class="grozy-row" data-cat="desktop"><td>16</td><td><strong>TeamViewer</strong></td><td><span class="badge-cat badge-cat-desktop">Desktop</span></td><td>2024 / Credential Compromise</td><td>Włamanie grupy APT29 z użyciem skompromitowanych poświadczeń pracownika korporacji</td><td>Nieautoryzowany dostęp do wewnętrznego środowiska IT producenta oprogramowania</td></tr>
+                                <tr class="grozy-row" data-cat="desktop"><td>17</td><td><strong>Signal Desktop</strong></td><td><span class="badge-cat badge-cat-desktop">Desktop</span></td><td>2023 / Nieszyfrowana SQLite</td><td>Przechowywanie klucza deszyfrującego w jawnym pliku JSON obok bazy db.sqlite w katalogu profilu</td><td>Błyskawiczne odczytanie całej historii wiadomości po uzyskaniu lokalnego dostępu do systemu plików</td></tr>
+                                <tr class="grozy-row" data-cat="desktop"><td>18</td><td><strong>Telegram Desktop</strong></td><td><span class="badge-cat badge-cat-desktop">Desktop</span></td><td>2024 / CVE-2024-31497</td><td>Błąd obsługi skrótów i automatyczne uruchamianie archiwów Pythona (.pyz) maskowanych jako pliki wideo</td><td>Zdalne wykonanie złośliwego kodu na komputerze ofiary po kliknięciu pliku na czacie</td></tr>
+                                <tr class="grozy-row" data-cat="desktop"><td>19</td><td><strong>KeePass</strong></td><td><span class="badge-cat badge-cat-desktop">Desktop</span></td><td>2023 / CVE-2023-32784</td><td>Pozostawianie znaków hasła głównego w nieszyfrowanej pamięci procesu przez kontrolkę SecureTextBox</td><td>Odtworzenie pełnego hasła master ze zrzutu pamięci RAM (np. po ataku malware lub hibernacji)</td></tr>
+                                <tr class="grozy-row" data-cat="desktop"><td>20</td><td><strong>WinRAR</strong></td><td><span class="badge-cat badge-cat-desktop">Desktop</span></td><td>2023 / CVE-2023-38831</td><td>Błąd logiczny w obsłudze nazw rozszerzeń plików o identycznych nazwach katalogów w archiwum</td><td>Uruchomienie ukrytego skryptu .cmd/bat zamiast pliku graficznego PNG/JPG bez ostrzeżeń</td></tr>
+                                <tr class="grozy-row" data-cat="saas"><td>21</td><td><strong>LastPass</strong></td><td><span class="badge-cat badge-cat-saas">Web & SaaS</span></td><td>2022/2023 / Lateral Movement</td><td>Przejęcie prywatnego komputera pracownika DevOps przez lukę w Plex, kradzież kluczy AWS IAM</td><td>Eksfiltracja produkcyjnych kopii zapasowych sejfów haseł milionów użytkowników i korporacji</td></tr>
+                                <tr class="grozy-row" data-cat="saas"><td>22</td><td><strong>Okta</strong></td><td><span class="badge-cat badge-cat-saas">Web & SaaS</span></td><td>2023 / HAR Files Leak</td><td>Dostęp napastników do systemu ticketowego zawierającego niesanowane pliki sesyjne HTTP Archive</td><td>Kradzież aktywnych tokenów sesyjnych administratorów 100% klientów korporacyjnych Okty</td></tr>
+                                <tr class="grozy-row" data-cat="saas"><td>23</td><td><strong>CircleCI</strong></td><td><span class="badge-cat badge-cat-saas">Web & SaaS</span></td><td>2023 / Infekcja stacji DevOps</td><td>Infekcja stacji roboczej pracownika trojanem kradnącym sesje 2FA i tokeny dostępu SSO</td><td>Kradzież sekretów CI/CD, tokenów AWS i certyfikatów produkcyjnych tysięcy firm technologicznych</td></tr>
+                                <tr class="grozy-row" data-cat="saas"><td>24</td><td><strong>Canva</strong></td><td><span class="badge-cat badge-cat-saas">Web & SaaS</span></td><td>2020 / SQLi & BOLA</td><td>Luki weryfikacji tokenów OAuth i nieparametryzowane zapytania do bazy danych</td><td>Wyciek danych 139 mln użytkowników (nazwiska, maile, lokalizacje, skróty haseł)</td></tr>
+                                <tr class="grozy-row" data-cat="saas"><td>25</td><td><strong>Trello (Atlassian)</strong></td><td><span class="badge-cat badge-cat-saas">Web & SaaS</span></td><td>2024 / API Exposure</td><td>Niezabezpieczony publiczny endpoint REST API /members/ pozwalający na odpytanie o dowolny e-mail</td><td>Eksfiltracja i sprzedaż bazy 15 mln kont powiązanych z publicznymi i prywatnymi profilami</td></tr>
+                                <tr class="grozy-row" data-cat="saas"><td>26</td><td><strong>Twitter / X</strong></td><td><span class="badge-cat badge-cat-saas">Web & SaaS</span></td><td>2022/2023 / IDOR w API</td><td>Brak kontroli autoryzacji przy odpytywaniu mechanizmu synchronizacji kontaktów</td><td>Wyciek i publiczne opublikowanie bazy 200 mln użytkowników wiążącej profile z mailami</td></tr>
+                                <tr class="grozy-row" data-cat="saas"><td>27</td><td><strong>Dropbox Sign</strong></td><td><span class="badge-cat badge-cat-saas">Web & SaaS</span></td><td>2024 / Skompromitowane API</td><td>Nieautoryzowany dostęp do systemu konfiguracji produkcyjnej i bazy kluczy API</td><td>Dostęp atakujących do szablonów prawnych, podpisów cyfrowych oraz kluczy uwierzytelniania</td></tr>
+                                <tr class="grozy-row" data-cat="saas"><td>28</td><td><strong>Atlassian Confluence</strong></td><td><span class="badge-cat badge-cat-saas">Web & SaaS</span></td><td>2023 / CVE-2023-22515</td><td>Broken Access Control na ścieżce /setup/* pozwalający na ponowne uruchomienie instalatora</td><td>Zdalne utworzenie nowego konta administratora bez żadnych poświadczeń i przejęcie bazy wiedzy</td></tr>
+                                <tr class="grozy-row" data-cat="saas"><td>29</td><td><strong>GitHub (OAuth Apps)</strong></td><td><span class="badge-cat badge-cat-saas">Web & SaaS</span></td><td>2022 / Token Theft</td><td>Kradzież tokenów OAuth należących do aplikacji Heroku i Travis CI ze skompromitowanych baz</td><td>Pobranie zawartości prywatnych repozytoriów dziesiątek organizacji korzystających z tych narzędzi</td></tr>
+                                <tr class="grozy-row" data-cat="saas"><td>30</td><td><strong>Snowflake / Ticketmaster</strong></td><td><span class="badge-cat badge-cat-saas">Web & SaaS</span></td><td>2024 / Credential Stuffing</td><td>Brak wymuszenia MFA na kontach analitycznych baz danych i brak mechanizmów detekcji anomalii</td><td>Wyciek danych 560 mln klientów Ticketmaster oraz milionów klientów banku Santander</td></tr>
+                                <tr class="grozy-row" data-cat="infra"><td>31</td><td><strong>Microsoft Exchange</strong></td><td><span class="badge-cat badge-cat-infra">Infra & Chmura</span></td><td>2021 / ProxyLogon (CVE-2021-26855)</td><td>Podatność SSRF w połączeniu z niebezpieczną deserializacją w usłudze Exchange Web Services</td><td>Masowe, w pełni zautomatyzowane RCE na serwerach pocztowych korporacji i rządów na całym świecie</td></tr>
+                                <tr class="grozy-row" data-cat="infra"><td>32</td><td><strong>Microsoft Outlook</strong></td><td><span class="badge-cat badge-cat-infra">Infra & Chmura</span></td><td>2023 / CVE-2023-23397</td><td>Wstrzyknięcie zewnętrznej ścieżki UNC w polu dźwięku powiadomienia zadania kalendarza</td><td>Kradzież hashy NTLM użytkowników domenowych bez żadnej interakcji ofiary (Zero-Click)</td></tr>
+                                <tr class="grozy-row" data-cat="infra"><td>33</td><td><strong>Citrix NetScaler</strong></td><td><span class="badge-cat badge-cat-infra">Infra & Chmura</span></td><td>2023 / Citrix Bleed (CVE-2023-4966)</td><td>Przepełnienie bufora pamięci w obsłudze OpenID Connect ujawniające tokeny sesyjne w nagłówkach</td><td>Ominięcie 2FA i przejęcie aktywnych sesji korporacyjnych na bramach dostępowych VPN</td></tr>
+                                <tr class="grozy-row" data-cat="infra"><td>34</td><td><strong>Ivanti Connect Secure</strong></td><td><span class="badge-cat badge-cat-infra">Infra & Chmura</span></td><td>2024 / CVE-2024-21887</td><td>Ominięcie uwierzytelniania na panelu webowym połączone z OS Command Injection</td><td>Pełny root shell na zaporach brzegowych i natychmiastowe wejście do sieci wewnętrznych</td></tr>
+                                <tr class="grozy-row" data-cat="infra"><td>35</td><td><strong>Fortinet FortiOS</strong></td><td><span class="badge-cat badge-cat-infra">Infra & Chmura</span></td><td>2023 / CVE-2023-27997</td><td>Przepełnienie sterty (Heap Overflow) w obsłudze portalu SSL VPN</td><td>Zdalne wykonanie kodu na firewallu bez wcześniejszego uwierzytelnienia</td></tr>
+                                <tr class="grozy-row" data-cat="infra"><td>36</td><td><strong>Plex Media Server</strong></td><td><span class="badge-cat badge-cat-infra">Infra & Chmura</span></td><td>2022 / CVE-2020-5741</td><td>Niezabezpieczona deserializacja obiektów w module ładowania wtyczek Pythona</td><td>RCE na serwerze domowym; kluczowy wektor wejścia do ataku na sieć administratora LastPass</td></tr>
+                                <tr class="grozy-row" data-cat="infra"><td>37</td><td><strong>Apache Guacamole</strong></td><td><span class="badge-cat badge-cat-infra">Infra & Chmura</span></td><td>2020 / FreeRDP Flaws</td><td>Luki przepełnienia bufora w bibliotece obsługi protokołu RDP</td><td>Przejęcie bramy dostępowej przez złośliwy serwer RDP do którego łączył się użytkownik</td></tr>
+                                <tr class="grozy-row" data-cat="infra"><td>38</td><td><strong>F5 BIG-IP</strong></td><td><span class="badge-cat badge-cat-infra">Infra & Chmura</span></td><td>2022 / CVE-2022-1388</td><td>Błąd parsera nagłówków HTTP w interfejsie iControl REST (brak weryfikacji tożsamości)</td><td>Zdalne wykonanie poleceń w systemie Linux jako root bez podawania poświadczeń</td></tr>
+                                <tr class="grozy-row" data-cat="infra"><td>39</td><td><strong>SolarWinds Orion</strong></td><td><span class="badge-cat badge-cat-infra">Infra & Chmura</span></td><td>2020 / SUNBURST</td><td>Wstrzyknięcie kodu trojana do oficjalnego instalatora podczas procesu budowania (MSBuild)</td><td>Infekcja 18 000 organizacji, w tym Departamentu Bezpieczeństwa Krajowego USA i Microsoftu</td></tr>
+                                <tr class="grozy-row" data-cat="infra"><td>40</td><td><strong>MOVEit Transfer</strong></td><td><span class="badge-cat badge-cat-infra">Infra & Chmura</span></td><td>2023 / CVE-2023-34362</td><td>Krytyczna luka SQL Injection w interfejsie webowym aplikacji bezpiecznego transferu plików</td><td>Masowa eksfiltracja poufnych baz danych setek korporacji, banków i agencji rządowych</td></tr>
+                                <tr class="grozy-row" data-cat="supply"><td>41</td><td><strong>XZ Utils (liblzma)</strong></td><td><span class="badge-cat badge-cat-supply">Łańcuch dostaw</span></td><td>2024 / CVE-2024-3094</td><td>Wieloletni atak socjotechniczny; ukrycie backdoora w testowych archiwach M4/tar</td><td>Próba modyfikacji weryfikacji klucza RSA w sshd w celu zdobycia uniwersalnego dostępu roota</td></tr>
+                                <tr class="grozy-row" data-cat="supply"><td>42</td><td><strong>Apache Log4j</strong></td><td><span class="badge-cat badge-cat-supply">Łańcuch dostaw</span></td><td>2021 / Log4Shell (CVE-2021-44228)</td><td>Niezabezpieczona ewaluacja JNDI Lookup w formaterze logów komunikatów biblioteki</td><td>Masowe RCE na milionach serwerów po zalogowaniu ciągu tekstowego ${jndi:ldap://...}</td></tr>
+                                <tr class="grozy-row" data-cat="supply"><td>43</td><td><strong>Polyfill.io</strong></td><td><span class="badge-cat badge-cat-supply">Łańcuch dostaw</span></td><td>2024 / Przejęcie domeny</td><td>Sprzedaż domeny popularnej biblioteki JavaScript podmiotowi trzeciemu i podmiana skryptu CDN</td><td>Wstrzyknięcie złośliwego kodu przekierowującego użytkowników na ponad 100 000 stron internetowych</td></tr>
+                                <tr class="grozy-row" data-cat="supply"><td>44</td><td><strong>CrowdStrike Falcon</strong></td><td><span class="badge-cat badge-cat-supply">Łańcuch dostaw</span></td><td>2024 / Channel File 291</td><td>Brak walidacji wejścia pliku definicji reguł i brak wdrożenia kanarkowego w sterowniku jądra</td><td>Błąd odczytu pamięci poza zakresem i natychmiastowy BSOD na 8.5 mln maszyn Windows</td></tr>
+                                <tr class="grozy-row" data-cat="supply"><td>45</td><td><strong>Colors.js & Faker.js</strong></td><td><span class="badge-cat badge-cat-supply">Łańcuch dostaw</span></td><td>2022 / Sabotaż twórcy</td><td>Wprowadzenie nieskończonej pętli przez oryginalnego maintainera w proteście przeciw korporacjom</td><td>Paraliż potoków CI/CD i aplikacji w tysiącach projektów bazujących na ekosystemie Node.js</td></tr>
+                                <tr class="grozy-row" data-cat="supply"><td>46</td><td><strong>PyTorch (torchtriton)</strong></td><td><span class="badge-cat badge-cat-supply">Łańcuch dostaw</span></td><td>2022 / Dependency Confusion</td><td>Zarejestrowanie w publicznym indeksie PyPI paczki o nazwie tożsamej z wewnętrznym modułem nocnym</td><td>Pobranie i uruchomienie złośliwego binarium wykradającego klucze SSH ze stacji badaczy uczenia maszynowego</td></tr>
+                                <tr class="grozy-row" data-cat="supply"><td>47</td><td><strong>Node-ipc</strong></td><td><span class="badge-cat badge-cat-supply">Łańcuch dostaw</span></td><td>2022 / Protestware</td><td>Wprowadzenie kodu skanującego geolokalizację IP i nadpisującego pliki użytkowników z Rosji</td><td>Kryzys zaufania do pakietów npm i konieczność audytowania bezpośrednich zależności</td></tr>
+                                <tr class="grozy-row" data-cat="supply"><td>48</td><td><strong>Event-Stream</strong></td><td><span class="badge-cat badge-cat-supply">Łańcuch dostaw</span></td><td>2018/współczesne echo</td><td>Przekazanie opieki nad porzuconym pakietem napastnikowi, który dodał zależność flatmap-stream</td><td>Dedykowany atak na kradzież portfeli Bitcoin w aplikacji Copay; klasyk ataku na łańcuch dostaw</td></tr>
+                                <tr class="grozy-row" data-cat="supply"><td>49</td><td><strong>Ledger Connect Kit</strong></td><td><span class="badge-cat badge-cat-supply">Łańcuch dostaw</span></td><td>2023 / Kompromitacja npm</td><td>Kradzież konta byłego programisty przez phishing i wypuszczenie zatrutej wersji biblioteki</td><td>Podmiana adresów transakcji w setkach dApps i kradzież ponad 600 000 USD z portfeli krypto</td></tr>
+                                <tr class="grozy-row" data-cat="supply"><td>50</td><td><strong>ua-parser-js</strong></td><td><span class="badge-cat badge-cat-supply">Łańcuch dostaw</span></td><td>2021 / Przejęcie konta dewelopera</td><td>Skompromitowanie poświadczeń do pakietu notującego 8 mln pobrań tygodniowo</td><td>Automatyczne pobieranie koparki kryptowalut i trojana kradnącego hasła przy instalacji</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLAJD 3: ANATOMIA EKSPRESOWEGO INCYDENTU -->
+        <section class="slide" data-title="Anatomia incydentu: To nie AGD, to Linux" id="slide-3">
+            <div class="slide-page">
+                <div class="slide-header">
+                    <span class="slide-tag">Spojrzenie pod maskę</span>
+                    <h2 class="slide-title">To nie był ekspres do kawy. To był podatny serwer Linux.</h2>
+                    <p class="slide-subtitle">Dlaczego napastnik nie przejmuje się tym, do czego urządzenie służy w kuchni</p>
+                </div>
+                <div class="slide-content">
+                    <div class="grid-3">
+                        <div class="card card-primary">
+                            <div class="card-title">1. Wbudowany stos sieciowy</div>
+                            <div class="card-body">
+                                Urządzenie posiadało miniaturowy procesor z jądrem Linuksa, pełny stos TCP/IP, działający serwer HTTP oraz lokalny demon serwisowy otwarty na portach 80 i 8080.
+                            </div>
+                        </div>
+                        <div class="card card-danger">
+                            <div class="card-title">2. Grzechy kodu i architektury</div>
+                            <div class="card-body">
+                                Brak autoryzacji na wewnętrznym REST API, twardo zakodowane poświadczenia serwisowe (hardcoded credentials) oraz brak bezpiecznego mechanizmu podpisywanych aktualizacji OTA.
+                            </div>
+                        </div>
+                        <div class="card card-amber">
+                            <div class="card-title">3. Monetyzacja ataku</div>
+                            <div class="card-body">
+                                Ekspres generował ruch w wolumetrycznych atakach DDoS, pośredniczył w nielegalnym tunelowaniu proxy oraz brał udział w masowym skanowaniu kolejnych podsieci.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="quote-box">
+                        <strong>Wniosek techniczny:</strong> Dla atakującego nie ma znaczenia etykieta marketingowa („Smart Coffee Maker”, „Baza SQL banku”, „Mikroserwis zamówień”). Każdy proces posiadający interfejs sieciowy i podatny kod to po prostu darmowy procesor, pamięć RAM i łącze 100 Mb/s.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLAJD 4: ROZPAD ZAMKU I FOSY -->
+        <section class="slide" data-title="Upadek koncepcji Zamku i Fosy" id="slide-4">
+            <div class="slide-page">
+                <div class="slide-header">
+                    <span class="slide-tag">Architektura systemów</span>
+                    <h2 class="slide-title">Iluzja twierdzy: Dlaczego firewall nie uratuje aplikacji?</h2>
+                    <p class="slide-subtitle">Tradycyjne bezpieczeństwo obwodowe (Perimeter Security) w zderzeniu z nowoczesną siecią</p>
+                </div>
+                <div class="slide-content">
+                    <div class="grid-2">
+                        <div class="card card-danger">
+                            <div class="card-title">Model historyczny: Zamek i Fosa</div>
+                            <div class="card-body">
+                                <p>• Założenie: Sieć wewnętrzna (LAN) jest bezpieczna, zewnętrzna (WAN) jest wroga.</p>
+                                <p>• Na brzegu sieci stoi Firewall (zapora sieciowa L3/L4).</p>
+                                <p>• Wystarczy zablokować nieużywane porty, a serwery wewnątrz mogą sobie bezgranicznie ufać.</p>
+                                <p style="color: var(--accent-red); font-weight: 600; margin-top: 10px;">Model całkowicie martwy we współczesnych architekturach.</p>
+                            </div>
+                        </div>
+                        <div class="card card-primary">
+                            <div class="card-title">Współczesna rzeczywistość aplikacji</div>
+                            <div class="card-body">
+                                <p>• Porty <strong>80 (HTTP)</strong> i <strong>443 (HTTPS)</strong> muszą być z definicji otwarte na cały świat.</p>
+                                <p>• Aplikacje to rozproszona siatka mikroserwisów, chmur publicznych, API i workerów.</p>
+                                <p>• Ruch szyfrowany TLS: firewall brzegowy widzi jedynie strumień bajtów, nie rozumiejąc złośliwego ładunku w JSON.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card card-amber">
+                        <div class="card-title">Złota reguła bezpieczeństwa systemów:</div>
+                        <div class="card-body">
+                            Zapora sieciowa chroni porty. <strong>Bezpieczeństwo aplikacji chroni logikę i dane.</strong> Atakujący wchodzi legalnie przez port 443 i rozmawia z Twoim API w sposób zgodny ze specyfikacją protokołu!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLAJD 5: WARSTWA L7, AI I SŁOWNICZEK -->
+        <section class="slide" data-title="Warstwa L7, AI i Słownik" id="slide-5">
+            <!-- Strona 1: Czysty, zwarty slajd główny -->
+            <div class="slide-page" id="slide-5-main">
+                <div class="slide-header">
+                    <span class="slide-tag">Wektory ataków i krajobraz 2026/2027</span>
+                    <h2 class="slide-title">Dlaczego celem numer 1 jest warstwa aplikacji (L7)?</h2>
+                    <p class="slide-subtitle">Nikt nie łamie AES-256 brute-forcem. Atakuje się błędy w logice, łańcuch dostaw i kod generowany przez AI.</p>
+                </div>
+                <div class="slide-content">
+                    <div class="grid-4">
+                        <div class="card">
+                            <div class="card-title" style="color: var(--accent-cyan); font-size: 1.05rem;">1. Skład kodu</div>
+                            <div class="card-body" style="font-size: 0.88rem;">
+                                W typowej aplikacji zaledwie <strong>10–20%</strong> kodu to kod autorski. Pozostałe <strong>80–90%</strong> to zewnętrzne pakiety (npm, PyPI, Maven, Docker).
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title" style="color: var(--accent-red); font-size: 1.05rem;">2. Logika biznesowa</div>
+                            <div class="card-body" style="font-size: 0.88rem;">
+                                WAF potrafi zablokować proste SQLi, ale nie wie, że użytkownik <code>ID=15</code> nie powinien pobierać faktury użytkownika <code>ID=16</code> (IDOR / BOLA).
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title" style="color: var(--accent-purple); font-size: 1.05rem;">3. Kod z asystentów AI</div>
+                            <div class="card-body" style="font-size: 0.88rem;">
+                                <em>AI Package Hallucination / Slopsquatting</em> — atakujący rejestrują w npm wymyślone przez LLM pakiety. Bezkrytyczne wklejanie podatnego kodu AI.
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title" style="color: var(--accent-amber); font-size: 1.05rem;">4. Presja Time to Market</div>
+                            <div class="card-body" style="font-size: 0.88rem;">
+                                Funkcjonalności biznesowe mają priorytet. Testy bezpieczeństwa tradycyjnie spychane na koniec sprintu — albo pomijane aż do incydentu.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="quote-box">
+                        „Aplikacja jest jedynym elementem infrastruktury, do którego z premedytacją zapraszasz cały świat i pozwalasz mu wykonywać kod w Twoim środowisku.”
+                    </div>
+                </div>
+                <div class="drilldown-action-bar">
+                    <button class="drill-btn" onclick="scrollToElement('slide-5', 'slownik-pojec')">
+                        📖 Słowniczek kluczowych pojęć i skrótów (L7, WAF, IDOR, BOLA, ORM, CVE) ↓
+                    </button>
+                </div>
+            </div>
+
+            <!-- Strona 2: Osobny, pełnoekranowy widok słowniczka -->
+            <div class="drilldown-page" id="slownik-pojec">
+                <div class="drilldown-sub-header">
+                    <span class="drilldown-sub-title">Słowniczek pojęć: Najważniejsze skróty bezpieczeństwa aplikacji</span>
+                    <button class="back-btn" onclick="scrollToElement('slide-5', 'slide-5-main')">↑ Wróć do slajdu głównego</button>
+                </div>
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 110px;">Skrót</th>
+                            <th style="width: 250px;">Pełna nazwa angielska</th>
+                            <th>Znaczenie techniczne w architekturze i audycie</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="badge badge-blue">L7</span></td>
+                            <td><strong>Layer 7 (Application Layer)</strong></td>
+                            <td>Siódma warstwa modelu OSI (HTTP, WebSocket, gRPC). Tu przetwarzana jest logika biznesowa, autoryzacja i parsowanie danych użytkownika.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-amber">WAF</span></td>
+                            <td><strong>Web Application Firewall</strong></td>
+                            <td>Zapora aplikacyjna badająca ruch HTTP w poszukiwaniu znanych sygnatur ataków. Blokuje popularne exploity, ale nie weryfikuje praw dostępu w relacjach obiektowych.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-red">IDOR</span></td>
+                            <td><strong>Insecure Direct Object Reference</strong></td>
+                            <td>Błąd autoryzacji horyzontalnej: aplikacja przyjmuje identyfikator z zewnątrz (np. <code>?id=123</code>) i zwraca dane bez sprawdzenia, czy zalogowany użytkownik jest ich właścicielem.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-red">BOLA</span></td>
+                            <td><strong>Broken Object Level Auth.</strong></td>
+                            <td>Nowoczesne określenie błędu IDOR w świecie interfejsów REST API (kategoria nr 1 w oficjalnym rankingu OWASP API Security Top 10).</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-green">ORM</span></td>
+                            <td><strong>Object-Relational Mapping</strong></td>
+                            <td>Warstwa abstrakcji nad bazą danych (np. SQLAlchemy, Hibernate, Prisma). Chroni przed klasycznym SQLi poprzez automatyczne zapytania parametryzowane.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-purple">CVE</span></td>
+                            <td><strong>Common Vulnerabilities & Exposures</strong></td>
+                            <td>Globalny słownik powszechnie znanych luk bezpieczeństwa. Każda zidentyfikowana luka otrzymuje unikalny identyfikator (np. <code>CVE-2024-3094</code>).</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-blue">SBOM</span></td>
+                            <td><strong>Software Bill of Materials</strong></td>
+                            <td>Maszynowo czytelna lista (np. w formacie CycloneDX lub SPDX) wszystkich bibliotek, zależności tranzytywnych i modułów składających się na aplikację.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-amber">ReDoS</span></td>
+                            <td><strong>Regular Expression Denial of Service</strong></td>
+                            <td>Odmowa usługi spowodowana podatnym wyrażeniem regularnym, którego ewaluacja dla spreparowanego tekstu wymaga wykładniczej liczby operacji (backtracking).</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SLAJD 6: OWASP TOP 10 (2025) -->
+        <section class="slide" data-title="OWASP Top 10 (Edycja 2025)" id="slide-6">
+            <!-- Strona 1: Czysty slajd główny z tabelą -->
+            <div class="slide-page" id="slide-6-main">
+                <div class="slide-header">
+                    <span class="slide-tag">Standardy branżowe</span>
+                    <h2 class="slide-title">OWASP Top 10 (2025): Ewolucja zagrożeń</h2>
+                    <p class="slide-subtitle">Kliknij w dowolny wiersz tabeli, aby zjechać do szczegółowej analizy technicznej podatności</p>
+                </div>
+                <div class="slide-content">
+                    <table class="custom-table" id="owasp-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">KOD</th>
+                                <th style="width: 280px;">Kategoria OWASP 2025</th>
+                                <th>Esencja problemu technicznego</th>
+                                <th style="width: 120px; text-align: center;">Szczegóły</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="row-interactive" onclick="scrollToElement('slide-6', 'card-a01')">
+                                <td><span class="badge badge-red">A01</span></td>
+                                <td><strong>Broken Access Control</strong></td>
+                                <td>Błędy kontroli dostępu (IDOR, BOLA), nieuprawniony dostęp do zasobów i endpointów, w tym SSRF.</td>
+                                <td style="text-align: center; color: var(--accent-cyan); font-weight: 600;">Rozwiń ↓</td>
+                            </tr>
+                            <tr class="row-interactive" onclick="scrollToElement('slide-6', 'card-a02')">
+                                <td><span class="badge badge-amber">A02</span></td>
+                                <td><strong>Security Misconfiguration</strong></td>
+                                <td>Domyślne hasła, publiczne buckety S3, zbędne otwarte porty, brak bezpiecznych nagłówków HTTP.</td>
+                                <td style="text-align: center; color: var(--accent-cyan); font-weight: 600;">Rozwiń ↓</td>
+                            </tr>
+                            <tr class="row-interactive" onclick="scrollToElement('slide-6', 'card-a03')">
+                                <td><span class="badge badge-red">A03</span></td>
+                                <td><strong>Software Supply Chain Failures</strong></td>
+                                <td>Podatne, przestarzałe lub zainfekowane pakiety open-source w <code>package.json</code> / <code>requirements.txt</code>.</td>
+                                <td style="text-align: center; color: var(--accent-cyan); font-weight: 600;">Rozwiń ↓</td>
+                            </tr>
+                            <tr class="row-interactive" onclick="scrollToElement('slide-6', 'card-a04')">
+                                <td><span class="badge badge-blue">A04</span></td>
+                                <td><strong>Cryptographic Failures</strong></td>
+                                <td>Nieszyfrowane dane w bazie, brak TLS, przestarzałe algorytmy hashowania haseł (MD5, SHA-1 bez soli).</td>
+                                <td style="text-align: center; color: var(--accent-cyan); font-weight: 600;">Rozwiń ↓</td>
+                            </tr>
+                            <tr class="row-interactive" onclick="scrollToElement('slide-6', 'card-a05')">
+                                <td><span class="badge badge-amber">A05</span></td>
+                                <td><strong>Injection</strong></td>
+                                <td>Wstrzyknięcia SQL, NoSQL, OS Command, XSS. Spadek pozycji dzięki ORM-om i silnikom UI z escapowaniem.</td>
+                                <td style="text-align: center; color: var(--accent-cyan); font-weight: 600;">Rozwiń ↓</td>
+                            </tr>
+                            <tr class="row-interactive" onclick="scrollToElement('slide-6', 'card-a06')">
+                                <td><span class="badge badge-blue">A06</span></td>
+                                <td><strong>Insecure Design & Pozostałe</strong></td>
+                                <td>Błędy w architekturze, słabe uwierzytelnianie (A07), brak spójności (A08), logi (A09), błędy (A10).</td>
+                                <td style="text-align: center; color: var(--accent-cyan); font-weight: 600;">Rozwiń ↓</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="card card-primary" style="padding: 12px 18px; margin-top: 4px;">
+                        <div class="card-body" style="font-size: 0.88rem;">
+                            <strong>Ważna obserwacja:</strong> Dlaczego <code>A05 Injection</code> spadło, a <code>A01 Broken Access Control</code> dominuje? ORM-y automatycznie parametryzują zapytania SQL, ale żaden ORM nie wie sam z siebie, czy użytkownik ma prawo do edycji danego wiersza.
+                        </div>
+                    </div>
+                </div>
+                <div class="drilldown-action-bar">
+                    <button class="drill-btn" onclick="scrollToElement('slide-6', 'card-a01')">
+                        🔍 Przejdź do szczegółowej anatomii podatności OWASP Top 10 ↓
+                    </button>
+                </div>
+            </div>
+
+            <!-- Strona 2: Osobny, pełnoekranowy widok kart analitycznych -->
+            <div class="drilldown-page" id="owasp-details-page">
+                <div class="drilldown-sub-header">
+                    <span class="drilldown-sub-title">Szczegółowa anatomia techniczna podatności OWASP Top 10</span>
+                    <button class="back-btn" onclick="scrollToElement('slide-6', 'slide-6-main')">↑ Wróć do tabeli OWASP</button>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 18px;">
+                    <!-- A01 -->
+                    <div class="card card-danger" id="card-a01">
+                        <div class="card-title"><span class="badge badge-red">A01</span> Broken Access Control & SSRF</div>
+                        <div class="card-body">
+                            <strong>Mechanizm ataku:</strong> Zalogowany klient 104 wysyła żądanie <code>GET /api/faktury/105</code>. Aplikacja pobiera fakturę bez walidacji relacji do sesji (IDOR/BOLA). Atak SSRF wymusza na serwerze odpytanie instancji metadanych chmury <code>http://169.254.169.254/latest/meta-data/</code> i wyciek tokenów IAM.<br>
+                            <strong>Obrona:</strong> Wymuszenie autoryzacji na poziomie bazy: <code>WHERE id = :id AND user_id = :user_id</code> oraz blokowanie ruchu wychodzącego do sieci prywatnych.
+                        </div>
+                    </div>
+                    <!-- A02 -->
+                    <div class="card card-amber" id="card-a02">
+                        <div class="card-title"><span class="badge badge-amber">A02</span> Security Misconfiguration</div>
+                        <div class="card-body">
+                            <strong>Mechanizm ataku:</strong> Domyślne hasła administratora, publiczne buckety S3, brak nagłówków bezpieczeństwa (<code>HSTS</code>, <code>CSP</code>), włączony tryb DEBUG na środowisku produkcyjnym ujawniający hasła w zmiennych środowiskowych.<br>
+                            <strong>Obrona:</strong> Automatyczny hardening kontenerów, skanery IaC (Checkov, Trivy) oraz domyślne wyłączanie nieużywanych portów.
+                        </div>
+                    </div>
+                    <!-- A03 -->
+                    <div class="card card-danger" id="card-a03">
+                        <div class="card-title"><span class="badge badge-red">A03</span> Software Supply Chain Failures</div>
+                        <div class="card-body">
+                            <strong>Mechanizm ataku:</strong> Wstrzyknięcie złośliwego kodu do publicznego pakietu open-source (Typosquatting, przejęcie konta dewelopera npm, Dependency Confusion). Kod złośliwy wykonuje się podczas instalacji lub w runtime aplikacji.<br>
+                            <strong>Obrona:</strong> Pliki lock z sumami kontrolnymi (<code>package-lock.json</code>), automatyczne skanery SCA (pip-audit, Trivy, npm audit), podpisywanie kontenerów (Cosign).
+                        </div>
+                    </div>
+                    <!-- A04 & A05 -->
+                    <div class="grid-2">
+                        <div class="card card-primary" id="card-a04">
+                            <div class="card-title"><span class="badge badge-blue">A04</span> Cryptographic Failures</div>
+                            <div class="card-body">
+                                <strong>Problem:</strong> Szybkie hashowanie haseł w MD5 lub SHA-256 bez soli (łamane tablicami tęczowymi w sekundy), brak TLS 1.3.<br>
+                                <strong>Obrona:</strong> Wolne algorytmy pamięciożerne z unikalną solą: <strong>Argon2id</strong> (standard branżowy) lub bcrypt.
+                            </div>
+                        </div>
+                        <div class="card card-amber" id="card-a05">
+                            <div class="card-title"><span class="badge badge-amber">A05</span> Injection (Wstrzyknięcia)</div>
+                            <div class="card-body">
+                                <strong>Problem:</strong> Konkatenacja zapytań SQL ze stringami użytkownika lub brak kodowania HTML wyjścia (XSS).<br>
+                                <strong>Obrona:</strong> Prepared Statements w ORM oraz silna polityka <code>Content-Security-Policy</code>.
+                            </div>
+                        </div>
+                    </div>
+                    <!-- A06-A10 -->
+                    <div class="card card-primary" id="card-a06">
+                        <div class="card-title"><span class="badge badge-blue">A06-A10</span> Insecure Design, Auth, Integrity, Logging, Exceptions</div>
+                        <div class="card-body">
+                            Błędy koncepcyjne (A06), słabe uwierzytelnianie podatne na brute-force (A07), niebezpieczna deserializacja obiektów np. <code>pickle.loads()</code> w Pythonie (A08), brak logów zdarzeń uniemożliwiający reakcję na włamanie (A09) oraz ujawnianie ścieżek serwera w StackTrace (A10).
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLAJD 7: STRIDE THREAT MODELING -->
+        <section class="slide" data-title="Modelowanie zagrożeń: STRIDE" id="slide-7">
+            <!-- Strona 1: Czysty slajd główny z 6 kartami -->
+            <div class="slide-page" id="slide-7-main">
+                <div class="slide-header">
+                    <span class="slide-tag">Projektowanie systemów</span>
+                    <h2 class="slide-title">Modelowanie zagrożeń: Metodyka STRIDE</h2>
+                    <p class="slide-subtitle">Jak psuć aplikację na tablicy, zanim napiszemy pierwszą linijkę kodu</p>
+                </div>
+                <div class="slide-content">
+                    <div class="grid-3">
+                        <div class="card card-primary" style="cursor: pointer;" onclick="scrollToElement('slide-7', 'stride-details-page')">
+                            <div class="card-title"><span class="badge badge-blue">S</span> Spoofing (Podszywanie się)</div>
+                            <div class="card-body">Czy napastnik może podać się za innego użytkownika lub mikroserwis? Obrona: silne uwierzytelnianie, mTLS, tokeny z podpisem.</div>
+                        </div>
+                        <div class="card card-primary" style="cursor: pointer;" onclick="scrollToElement('slide-7', 'stride-details-page')">
+                            <div class="card-title"><span class="badge badge-blue">T</span> Tampering (Manipulacja)</div>
+                            <div class="card-body">Czy przesyłane parametry lub dane w bazie mogą zostać zmodyfikowane w locie? Obrona: podpisy HMAC, integralność, TLS.</div>
+                        </div>
+                        <div class="card card-primary" style="cursor: pointer;" onclick="scrollToElement('slide-7', 'stride-details-page')">
+                            <div class="card-title"><span class="badge badge-blue">R</span> Repudiation (Wypieralność)</div>
+                            <div class="card-body">Czy użytkownik może wyprzeć się wykonania operacji finansowej? Obrona: audytowalne logi operacji, niezmienne zdarzenia.</div>
+                        </div>
+                        <div class="card card-primary" style="cursor: pointer;" onclick="scrollToElement('slide-7', 'stride-details-page')">
+                            <div class="card-title"><span class="badge badge-blue">I</span> Information Disclosure</div>
+                            <div class="card-body">Czy wrażliwe dane wyciekają w odpowiedziach API lub logach? Obrona: szyfrowanie at-rest, minimalizacja danych, maskowanie.</div>
+                        </div>
+                        <div class="card card-primary" style="cursor: pointer;" onclick="scrollToElement('slide-7', 'stride-details-page')">
+                            <div class="card-title"><span class="badge badge-blue">D</span> Denial of Service</div>
+                            <div class="card-body">Czy aplikację można zablokować wyczerpaniem procesora lub bazy? Obrona: Rate Limiting, timeouty, kolejki asynchroniczne.</div>
+                        </div>
+                        <div class="card card-primary" style="cursor: pointer;" onclick="scrollToElement('slide-7', 'stride-details-page')">
+                            <div class="card-title"><span class="badge badge-blue">E</span> Elevation of Privilege</div>
+                            <div class="card-body">Czy zwykły użytkownik może nadać sobie uprawnienia administratora? Obrona: weryfikacja ról (RBAC/ABAC) po stronie serwera.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="drilldown-action-bar">
+                    <button class="drill-btn" onclick="scrollToElement('slide-7', 'stride-details-page')">
+                        🔍 Zobacz szczegółowe scenariusze ataków i mitigacje w STRIDE ↓
+                    </button>
+                </div>
+            </div>
+
+            <!-- Strona 2: Osobny, pełnoekranowy widok scenariuszy STRIDE -->
+            <div class="drilldown-page" id="stride-details-page">
+                <div class="drilldown-sub-header">
+                    <span class="drilldown-sub-title">STRIDE w praktyce: Scenariusze ataków i metody obrony</span>
+                    <button class="back-btn" onclick="scrollToElement('slide-7', 'slide-7-main')">↑ Wróć do przeglądu STRIDE</button>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="card card-primary">
+                        <div class="card-title"><span class="badge badge-blue">S</span> Spoofing — Podszywanie się pod tożsamość</div>
+                        <div class="card-body">
+                            <strong>Scenariusz:</strong> Wstrzyknięcie fałszywego nagłówka <code>X-Forwarded-For: 127.0.0.1</code> lub przesłanie tokenu JWT ze zmienionym nagłówkiem <code>"alg": "none"</code>.<br>
+                            <strong>Mitigacja:</strong> Weryfikacja podpisu asymetrycznym kluczem publicznym (RS256 / EdDSA) oraz wzajemne uwierzytelnianie mTLS pomiędzy usługami.
+                        </div>
+                    </div>
+                    <div class="card card-amber">
+                        <div class="card-title"><span class="badge badge-amber">T</span> Tampering — Manipulacja parametrami zamówienia</div>
+                        <div class="card-body">
+                            <strong>Scenariusz:</strong> Formularz zamówienia przekazuje ukryte pole <code>&lt;input type="hidden" name="cena" value="999.00"&gt;</code>. Atakujący zmienia wartość na <code>0.01</code> w konsoli DevTools.<br>
+                            <strong>Mitigacja:</strong> Cena pobierana wyłącznie z zaufanej bazy serwera na podstawie ID produktu. Żadnych krytycznych danych biznesowych w ukrytych polach HTML!
+                        </div>
+                    </div>
+                    <div class="card card-blue">
+                        <div class="card-title"><span class="badge badge-blue">R</span> Repudiation — Wypieralność działań</div>
+                        <div class="card-body">
+                            <strong>Scenariusz:</strong> Użytkownik zleca przelew środków, po czym twierdzi, że tego nie zamawiał, a logi serwera nie zapisują identyfikatora sesji ani sumy kontrolnej transakcji.<br>
+                            <strong>Mitigacja:</strong> Niezmienne logi audytowe (WORM — Write Once, Read Many) przesyłane strumieniowo do zewnętrznego systemu SIEM.
+                        </div>
+                    </div>
+                    <div class="card card-danger">
+                        <div class="card-title"><span class="badge badge-red">D & E</span> Denial of Service oraz Elevation of Privilege</div>
+                        <div class="card-body">
+                            <strong>DoŚ:</strong> Endpoint <code>/api/produkty?limit=1000000</code> powoduje wyczerpanie pamięci RAM serwera Node.js i zawieszenie aplikacji.<br>
+                            <strong>Elevation:</strong> Przesłanie w JSON pola <code>{"role": "admin"}</code> podczas rejestracji klienta (podatność Mass Assignment).<br>
+                            <strong>Mitigacja:</strong> Sztywne limity paginacji (max 50 rekordów) oraz restrykcyjne DTO/szablony wejścia odrzucające nieautoryzowane pola.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLAJD 8: TRIADA TESTÓW (SAST, DAST, SCA) -->
+        <section class="slide" data-title="Triada automatyzacji: SAST, DAST, SCA" id="slide-8">
+            <!-- Strona 1: Czysty slajd główny z triadą -->
+            <div class="slide-page" id="slide-8-main">
+                <div class="slide-header">
+                    <span class="slide-tag">Automatyzacja w DevSecOps</span>
+                    <h2 class="slide-title">Triada automatyzacji testów bezpieczeństwa</h2>
+                    <p class="slide-subtitle">Ręczny audyt raz w roku to za mało. Jak automatyzować weryfikację w potoku CI/CD?</p>
+                </div>
+                <div class="slide-content">
+                    <div class="grid-3">
+                        <div class="card card-primary" style="cursor: pointer;" onclick="scrollToElement('slide-8', 'triada-matrix-page')">
+                            <div class="card-title" style="color: var(--accent-cyan);">SAST</div>
+                            <div class="card-body">
+                                <strong>Static Application Security Testing</strong>
+                                <p style="margin-top: 8px;">• Badanie kodu źródłowego bez jego uruchamiania (White-Box).</p>
+                                <p>• Analizuje drzewo składniowe AST, wykrywa brak sanityzacji, niebezpieczne funkcje systemowe.</p>
+                                <p style="margin-top: 8px; color: var(--accent-cyan);">Narzędzia: <strong>Semgrep, SonarQube, Bandit</strong></p>
+                            </div>
+                        </div>
+                        <div class="card card-danger" style="cursor: pointer;" onclick="scrollToElement('slide-8', 'triada-matrix-page')">
+                            <div class="card-title" style="color: var(--accent-red);">DAST</div>
+                            <div class="card-body">
+                                <strong>Dynamic Application Security Testing</strong>
+                                <p style="margin-top: 8px;">• Badanie działającej aplikacji z zewnątrz (Black-Box).</p>
+                                <p>• Wysyła sfuzzowane żądania HTTP, sprawdza reakcję na wstrzyknięcia i konfigurację nagłówków.</p>
+                                <p style="margin-top: 8px; color: var(--accent-red);">Narzędzia: <strong>OWASP ZAP, Burp Suite, Nuclei</strong></p>
+                            </div>
+                        </div>
+                        <div class="card card-amber" style="cursor: pointer;" onclick="scrollToElement('slide-8', 'triada-matrix-page')">
+                            <div class="card-title" style="color: var(--accent-amber);">SCA</div>
+                            <div class="card-body">
+                                <strong>Software Composition Analysis</strong>
+                                <p style="margin-top: 8px;">• Analiza drzewa zależności i kontenerów (SBOM).</p>
+                                <p>• Porównuje wersje bibliotek z publicznymi bazami znanych podatności (CVE/NVD).</p>
+                                <p style="margin-top: 8px; color: var(--accent-amber);">Narzędzia: <strong>Trivy, pip-audit, npm audit, Snyk</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card" style="padding: 14px 20px; background: rgba(0, 110, 250, 0.08); border-color: rgba(0, 110, 250, 0.3);">
+                        <div class="card-body" style="font-size: 0.92rem; text-align: center;">
+                            <strong>Złota zasada:</strong> Żadne z tych narzędzi nie działa w próżni. Prawdziwe bezpieczeństwo w CI/CD to synergia: SAST (mój kod) + SCA (cudzy kod) + DAST (uruchomiony stos).
+                        </div>
+                    </div>
+                </div>
+                <div class="drilldown-action-bar">
+                    <button class="drill-btn" onclick="scrollToElement('slide-8', 'triada-matrix-page')">
+                        📊 Zobacz zestawienie porównawcze (SAST vs DAST vs SCA) ↓
+                    </button>
+                </div>
+            </div>
+
+            <!-- Strona 2: Osobny, pełnoekranowy widok macierzy porównawczej -->
+            <div class="drilldown-page" id="triada-matrix-page">
+                <div class="drilldown-sub-header">
+                    <span class="drilldown-sub-title">Zestawienie porównawcze: Podejścia testowe w praktyce</span>
+                    <button class="back-btn" onclick="scrollToElement('slide-8', 'slide-8-main')">↑ Wróć do omówienia triady</button>
+                </div>
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Kryterium techniczne</th>
+                            <th style="color: var(--accent-cyan);">SAST (Kod źródłowy)</th>
+                            <th style="color: var(--accent-red);">DAST (Uruchomiony serwer)</th>
+                            <th style="color: var(--accent-amber);">SCA (Zależności open-source)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Perspektywa testu</strong></td>
+                            <td>White-Box (pełen dostęp do repozytorium)</td>
+                            <td>Black-Box (brak wglądu w kod, tylko HTTP)</td>
+                            <td>Manifest / SBOM (graf zależności)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Czy wymaga uruchomienia?</strong></td>
+                            <td>Nie (skanuje pliki tekstowe)</td>
+                            <td>Tak (musi działać środowisko i baza danych)</td>
+                            <td>Nie (analizuje pliki lock i obrazy Docker)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Pozycja w pipeline CI/CD</strong></td>
+                            <td>Pre-commit hook, etap Pull Request</td>
+                            <td>Środowisko Staging / Test przed wydaniem</td>
+                            <td>Etap Build / tworzenie obrazu kontenera</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Czas wykonania skanu</strong></td>
+                            <td>Szybki (kilka do kilkudziesięciu sekund)</td>
+                            <td>Wolny (od kilkunastu minut do kilku godzin)</td>
+                            <td>Ekspresowy (od ułamka sekundy do kilku s)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Fałszywe alarmy (False Positives)</strong></td>
+                            <td>Średni / Wysoki (wymaga strojenia reguł)</td>
+                            <td>Bardzo niski (weryfikuje realną odpowiedź HTTP)</td>
+                            <td>Niski (bazuje na skatalogowanych numerach CVE)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SLAJD 9: NARZĘDZIA W PRAKTYCE (TERMINAL) -->
+        <section class="slide" data-title="Narzędzia w praktyce (CLI)" id="slide-9">
+            <!-- Strona 1: Czysty slajd główny z konsolami -->
+            <div class="slide-page" id="slide-9-main">
+                <div class="slide-header">
+                    <span class="slide-tag">Warsztat techniczny</span>
+                    <h2 class="slide-title">Narzędzia w akcji: Terminal DevSecOps</h2>
+                    <p class="slide-subtitle">Komendy i konfiguracje, które włączymy do testów laboratoryjnych oraz pipeline'u CI/CD</p>
+                </div>
+                <div class="slide-content">
+                    <div class="grid-2">
+                        <div class="terminal">
+                            <div class="terminal-header">
+                                <div class="terminal-dots">
+                                    <div class="terminal-dot dot-red"></div>
+                                    <div class="terminal-dot dot-yellow"></div>
+                                    <div class="terminal-dot dot-green"></div>
+                                </div>
+                                <span class="terminal-title">bash — semgrep scan (SAST)</span>
+                            </div>
+                            <div class="terminal-body"><span class="terminal-comment"># Uruchomienie skanowania regułami OWASP Top 10</span>
+<span class="terminal-cmd">$ semgrep scan</span> <span class="terminal-param">--config "p/owasp-top-ten" --error</span> ./src
+
+<span class="terminal-output">┌────────────────┐
+│ 1 Code Finding │
+└────────────────┘
+src/auth.py
+❯❯❱ python.sqlalchemy.security.audit.direct-sql-execution
+    Found raw SQL string formatting in repository query.
+    Use parameterized queries or ORM filter instead.
+    72┆ query = f"SELECT * FROM users WHERE login = '{user_input}'"
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span></div>
+                        </div>
+
+                        <div class="terminal">
+                            <div class="terminal-header">
+                                <div class="terminal-dots">
+                                    <div class="terminal-dot dot-red"></div>
+                                    <div class="terminal-dot dot-yellow"></div>
+                                    <div class="terminal-dot dot-green"></div>
+                                </div>
+                                <span class="terminal-title">bash — trivy image (SCA)</span>
+                            </div>
+                            <div class="terminal-body"><span class="terminal-comment"># Skanowanie obrazu kontenera produkcyjnego</span>
+<span class="terminal-cmd">$ trivy image</span> <span class="terminal-param">--severity HIGH,CRITICAL --no-progress</span> krasnalshop:latest
+
+<span class="terminal-output">krasnalshop:latest (debian 12.2)
+================================
+Total: 2 (HIGH: 1, CRITICAL: 1)
+
+┌────────────┬────────────────┬──────────┬──────────────┬───────────────┐
+│  LIBRARY   │ VULNERABILITY  │ SEVERITY │  INSTALLED   │ FIXED VERSION │
+├────────────┼────────────────┼──────────┼──────────────┼───────────────┤
+│ libssl3    │ CVE-2024-2511  │ CRITICAL │ 3.0.11-1     │ 3.0.13-1      │
+│ curl       │ CVE-2024-2398  │ HIGH     │ 7.88.1-10    │ 7.88.1-10+deb │
+└────────────┴────────────────┴──────────┴──────────────┴───────────────┘</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="drilldown-action-bar">
+                    <button class="drill-btn" onclick="scrollToElement('slide-9', 'cli-advanced-page')">
+                        🛠️ Zobacz jak pisać własne reguły Semgrep i skonfigurować CI/CD Quality Gate ↓
+                    </button>
+                </div>
+            </div>
+
+            <!-- Strona 2: Osobny, pełnoekranowy widok reguł i CI/CD -->
+            <div class="drilldown-page" id="cli-advanced-page">
+                <div class="drilldown-sub-header">
+                    <span class="drilldown-sub-title">Zaawansowana automatyzacja: Własne reguły SAST oraz potok GitHub Actions</span>
+                    <button class="back-btn" onclick="scrollToElement('slide-9', 'slide-9-main')">↑ Wróć do konsoli CLI</button>
+                </div>
+                <div class="grid-2">
+                    <div class="terminal">
+                        <div class="terminal-header">
+                            <div class="terminal-dots">
+                                <div class="terminal-dot dot-red"></div>
+                                <div class="terminal-dot dot-yellow"></div>
+                                <div class="terminal-dot dot-green"></div>
+                            </div>
+                            <span class="terminal-title">.semgrep/no-hardcoded-secrets.yml (Własna reguła)</span>
+                        </div>
+                        <div class="terminal-body"><span class="terminal-comment">rules:
+  - id: forbid-hardcoded-jwt-secret
+    languages: [python]
+    message: "Wykryto twardo zakodowany klucz JWT! Pobierz go ze zmiennej środowiskowej."
+    severity: ERROR
+    patterns:
+      - pattern: jwt.encode(..., key="$KEY", ...)
+      - pattern-not: jwt.encode(..., key=os.environ[...], ...)</span></div>
+                    </div>
+
+                    <div class="terminal">
+                        <div class="terminal-header">
+                            <div class="terminal-dots">
+                                <div class="terminal-dot dot-red"></div>
+                                <div class="terminal-dot dot-yellow"></div>
+                                <div class="terminal-dot dot-green"></div>
+                            </div>
+                            <span class="terminal-title">.github/workflows/security.yml (Quality Gate)</span>
+                        </div>
+                        <div class="terminal-body"><span class="terminal-comment">name: Security Quality Gate
+on: [pull_request]
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Uruchom Semgrep SAST
+        run: semgrep ci --config auto --error
+      - name: Weryfikacja zależności SCA
+        run: pip-audit -r requirements.txt</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLAJD 10: SHIFT-LEFT & KOSZT BŁĘDÓW (WYPEŁNIONY, WYŚRODKOWANY) -->
+        <section class="slide" data-title="Podejście Shift-Left" id="slide-10">
+            <div class="slide-page" style="justify-content: center; gap: 24px;">
+                <div class="slide-header" style="margin-bottom: 12px;">
+                    <span class="slide-tag">Kultura DevSecOps</span>
+                    <h2 class="slide-title">Podejście Shift-Left: Ekonomia bezpieczeństwa</h2>
+                    <p class="slide-subtitle">Dlaczego usunięcie luki w fazie pisania kodu jest 100 razy tańsze niż po wdrożeniu na produkcję</p>
+                </div>
+                
+                <div class="grid-4">
+                    <div class="card card-success">
+                        <div class="card-title" style="color: var(--accent-green); font-size: 1.25rem;">1x Koszt</div>
+                        <div class="card-body">
+                            <strong>Etap: Projekt / Kod w IDE</strong>
+                            <p style="margin-top: 6px;">Linter lub wtyczka SAST w edytorze podświetla błąd. Programista poprawia go w 2 minuty przed wykonaniem commita.</p>
+                            <div style="margin-top: 10px; font-size: 0.8rem; color: var(--accent-green); font-weight: 600;">Koszt: ~2 minuty pracy</div>
+                        </div>
+                    </div>
+                    <div class="card card-primary">
+                        <div class="card-title" style="color: var(--accent-cyan); font-size: 1.25rem;">5x Koszt</div>
+                        <div class="card-body">
+                            <strong>Etap: CI / Pull Request</strong>
+                            <p style="margin-top: 6px;">Zautomatyzowany test blokuje merge. Wymaga ponownego uruchomienia pipeline'u, poprawki i powiadomienia zespołu.</p>
+                            <div style="margin-top: 10px; font-size: 0.8rem; color: var(--accent-cyan); font-weight: 600;">Koszt: ~1–2 godziny</div>
+                        </div>
+                    </div>
+                    <div class="card card-amber">
+                        <div class="card-title" style="color: var(--accent-amber); font-size: 1.25rem;">15x Koszt</div>
+                        <div class="card-body">
+                            <strong>Etap: QA / Staging</strong>
+                            <p style="margin-top: 6px;">Podatność wykryta w testach integracyjnych. Zgłoszenie ticketu w Jira, cofnięcie wydania wersji, ponowna regresja.</p>
+                            <div style="margin-top: 10px; font-size: 0.8rem; color: var(--accent-amber); font-weight: 600;">Koszt: ~1–2 dni zespołu</div>
+                        </div>
+                    </div>
+                    <div class="card card-danger">
+                        <div class="card-title" style="color: var(--accent-red); font-size: 1.25rem;">100x+ Koszt</div>
+                        <div class="card-body">
+                            <strong>Etap: Produkcja</strong>
+                            <p style="margin-top: 6px;">Incydent publiczny, wyciek bazy danych, zgłoszenie do UODO (kary RODO do 20M EUR), utrata reputacji, przestój.</p>
+                            <div style="margin-top: 10px; font-size: 0.8rem; color: var(--accent-red); font-weight: 600;">Koszt: Miliony PLN + prawnicy</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabela wskaźników technicznych wypełniająca przestrzeń -->
+                <table class="custom-table" style="font-size: 0.88rem;">
+                    <thead>
+                        <tr>
+                            <th style="width: 220px;">Faza wytwarzania (SDLC)</th>
+                            <th style="width: 250px;">Narzędzie weryfikacji</th>
+                            <th>Konsekwencje techniczne i biznesowe</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong style="color: var(--accent-green);">Design & Coding</strong></td>
+                            <td>Modelowanie STRIDE, linery SAST w VS Code / JetBrains</td>
+                            <td>Podatność eliminowana na tablicy projektowej lub przy pisaniu funkcji.</td>
+                        </tr>
+                        <tr>
+                            <td><strong style="color: var(--accent-cyan);">Pull Request (CI)</strong></td>
+                            <td>Semgrep CI, pip-audit, Trivy (Quality Gate)</td>
+                            <td>Blokada wdrożenia z poziomu gita — kod podatny nie opuszcza repozytorium.</td>
+                        </tr>
+                        <tr>
+                            <td><strong style="color: var(--accent-red);">Produkcja (Runtime)</strong></td>
+                            <td>WAF, SIEM, bug bounty, audyty zewnętrzne</td>
+                            <td>Późne wykrycie oznacza konieczność natychmiastowych hotfixów, audytu powłamaniowego i powiadomienia organów nadzorczych.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="quote-box" style="margin-top: 0;">
+                    <strong>Zasada Shift-Left:</strong> Przesunięcie odpowiedzialności i testów bezpieczeństwa maksymalnie na lewą stronę osi czasu projektu — tam, gdzie błąd jest jeszcze tani i bezbolesny do usunięcia.
+                </div>
+            </div>
+        </section>
+
+        <!-- SLAJD 11: ZŁOTE ZASADY SECURE BY DESIGN (WYPEŁNIONY, ZBALANSOWANY) -->
+        <section class="slide" data-title="Zasady Secure by Design" id="slide-11">
+            <div class="slide-page" style="justify-content: center; gap: 24px;">
+                <div class="slide-header" style="margin-bottom: 8px;">
+                    <span class="slide-tag">Dobre praktyki architektoniczne</span>
+                    <h2 class="slide-title">Cztery filary Secure by Design</h2>
+                    <p class="slide-subtitle">Zasady, które każdy projektant oprogramowania powinien traktować jak instynkt</p>
+                </div>
+                
+                <div class="grid-2">
+                    <div class="card card-primary">
+                        <div class="card-title">1. Zasada najmniejszych uprawnień (Least Privilege)</div>
+                        <div class="card-body">
+                            <p>Żaden proces, usługa ani użytkownik nie może posiadać większych praw niż absolutnie konieczne do wykonania zadania.</p>
+                            <p style="margin-top: 8px; color: var(--accent-cyan);"><strong>Dobre praktyki implementacji:</strong></p>
+                            <p>• Dyrektywa <code>USER appuser</code> w pliku Dockerfile (kontenery nigdy nie uruchamiają się jako root).</p>
+                            <p>• Dedykowane konto bazy danych bez uprawnień <code>DROP TABLE</code> czy <code>ALTER TABLE</code>.</p>
+                        </div>
+                    </div>
+
+                    <div class="card card-primary">
+                        <div class="card-title">2. Obrona w głąb (Defense in Depth)</div>
+                        <div class="card-body">
+                            <p>Bezpieczeństwo systemu nigdy nie może opierać się na pojedynczej linii obrony.</p>
+                            <p style="margin-top: 8px; color: var(--accent-cyan);"><strong>Dobre praktyki implementacji:</strong></p>
+                            <p>• Walidacja na frontendzie to wygoda dla usera (UX), nie bezpieczeństwo.</p>
+                            <p>• Pełna walidacja w API + zapytania parametryzowane + uprawnienia na poziomie wiersza w bazie danych.</p>
+                        </div>
+                    </div>
+
+                    <div class="card card-amber">
+                        <div class="card-title">3. Nigdy nie ufaj danym wejściowym (Zero Trust Input)</div>
+                        <div class="card-body">
+                            <p>Każdy bajt pochodzący z zewnątrz jest traktowany jako potencjalnie złośliwy ładunek.</p>
+                            <p style="margin-top: 8px; color: var(--accent-amber);"><strong>Dobre praktyki implementacji:</strong></p>
+                            <p>• Brak zaufania do nagłówków <code>Origin</code>, <code>Referer</code> czy ciasteczek.</p>
+                            <p>• Twarde schematy walidacji wejścia (Pydantic w Pythonie, Zod w TypeScript) odrzucające niespodziewane pola.</p>
+                        </div>
+                    </div>
+
+                    <div class="card card-success">
+                        <div class="card-title">4. Bezpieczne ustawienia domyślne (Secure Defaults)</div>
+                        <div class="card-body">
+                            <p>Aplikacja w stanie domyślnym musi być bezpieczna bez konieczności dodatkowej konfiguracji.</p>
+                            <p style="margin-top: 8px; color: var(--accent-green);"><strong>Dobre praktyki implementacji:</strong></p>
+                            <p>• Domyślna odmowa dostępu (<em>Deny by Default</em>) w regułach autoryzacji.</p>
+                            <p>• Ciasteczka z flagami <code>HttpOnly; Secure; SameSite=Strict</code> włączonymi natywnie w frameworku.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-primary" style="padding: 14px 22px; background: rgba(0, 110, 250, 0.08);">
+                    <div class="card-body" style="font-size: 0.92rem; text-align: center;">
+                        <strong>Podsumowanie architektoniczne:</strong> Dobre oprogramowanie nie polega na łataniu dziur po testach penetracyjnych. Dobre oprogramowanie jest projektowane w sposób uniemożliwiający wystąpienie całej klasy podatności.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLAJD 12: PODSUMOWANIE & KRASNALSHOP -->
+        <section class="slide" data-title="Poligon laboratoryjny KrasnalShop" id="slide-12">
+            <div class="slide-page" style="justify-content: center; gap: 22px;">
+                <div class="slide-header" style="margin-bottom: 8px;">
+                    <span class="slide-tag">Kolejne kroki na studiach magisterskich</span>
+                    <h2 class="slide-title">Od teorii do praktyki: Poligon KrasnalShop</h2>
+                    <p class="slide-subtitle">Przechodzimy do środowiska warsztatowego i praktycznych zadań zaliczeniowych</p>
+                </div>
+                <div class="slide-content">
+                    <div class="grid-2">
+                        <div class="card card-primary">
+                            <div class="card-title">Co przygotowaliśmy na laboratoria:</div>
+                            <div class="card-body">
+                                <p>• <strong>KrasnalShop:</strong> Dedykowana platforma e-commerce z celowo zaszytymi lukami logicznymi i technicznymi.</p>
+                                <p style="margin-top: 8px;">• Środowisko uruchamiane w Docker Compose — bezpieczna piaskownica do testowania ataków i obrony.</p>
+                                <p style="margin-top: 8px;">• 20 zadań problemowych obejmujących pełen cykl: od audytu logów serwera, przez analizę IDOR i SQLi, po tworzenie reguł SAST i łatanie kodu.</p>
+                            </div>
+                        </div>
+                        <div class="card card-success">
+                            <div class="card-title">Twoja rola na studiach magisterskich:</div>
+                            <div class="card-body">
+                                <p>• <strong>Architekt i audytor:</strong> Nie tylko znajdujesz lukę, ale projektujesz architekturę odporną na całą klasę podobnych błędów.</p>
+                                <p style="margin-top: 8px;">• <strong>Automatyzacja:</strong> Budujesz automatyczne skanery weryfikujące kod przy każdym commicie (DevSecOps Quality Gate).</p>
+                                <p style="margin-top: 8px;">• <strong>Myślenie ofensywne i defensywne:</strong> Rozumiesz motywację atakującego, aby skutecznie zabezpieczyć zasoby biznesowe.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Zasoby kursu i repozytoria -->
+                    <div class="card" style="padding: 20px 24px; background: rgba(0, 110, 250, 0.1); border-color: var(--merito-blue);">
+                        <h3 style="font-size: 1.15rem; margin-bottom: 12px; color: var(--text-primary); text-align: center;">Materiały dydaktyczne i poligon laboratoryjny:</h3>
+                        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.92rem;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 8px 16px; border-radius: 6px;">
+                                <span>📦 <strong>Repozytorium Git (Kody & Zadania):</strong></span>
+                                <code style="color: var(--accent-cyan); font-family: var(--font-mono);">https://dev.zarnecki.org/Merito/bezpieczenstwo_aplikacji.git</code>
+                            </div>
+                            <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 8px 16px; border-radius: 6px;">
+                                <span>☁️ <strong>Chmura Nextcloud (Pliki & Raporty):</strong></span>
+                                <a href="https://chmura.zarnecki.org/s/iLdT3J5YGTTYCPr" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-family: var(--font-mono); font-weight: 600;">https://chmura.zarnecki.org/s/iLdT3J5YGTTYCPr ↗</a>
+                            </div>
+                            <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 8px 16px; border-radius: 6px;">
+                                <span>🌐 <strong>GitHub Pages (Strona kursu):</strong></span>
+                                <span style="color: var(--text-muted); font-style: italic;">W przygotowaniu (link zostanie udostępniony wkrótce)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Bottom Controls & University Branding -->
+    <footer id="bottom-bar">
+        <div class="bar-left">
+            <span class="bar-badge">WSB Merito Wrocław</span>
+            <span>|</span>
+            <span>Bezpieczeństwo Aplikacji</span>
+            <span>|</span>
+            <span style="color: var(--text-secondary);">Wykład 1 (mgr Przemysław Żarnecki)</span>
+        </div>
+
+        <div class="bar-center">
+            <button class="nav-btn" id="btn-prev" title="Poprzedni slajd (Strzałka w lewo)">Poprzedni</button>
+            <button class="nav-btn" id="btn-overview" title="Przegląd slajdów (Klawisz O)">Przegląd [O]</button>
+            <button class="nav-btn" id="btn-next" title="Następny slajd (Strzałka w prawo)">Następny</button>
+            <button class="nav-btn" id="btn-fullscreen" title="Pełny ekran (Klawisz F)">Pełny ekran [F]</button>
+        </div>
+
+        <div class="bar-right">
+            <span class="shortcut-hint">Klawisze: ← / → / ↓ (szczegóły) / Spacja / F / O</span>
+            <span id="slide-counter">01 / 12</span>
+        </div>
+    </footer>
+
+    <!-- Overview Modal (Lightbox) -->
+    <div id="overview-modal">
+        <div class="overview-header">
+            <h3 class="overview-title">Przegląd slajdów wykładu</h3>
+            <button class="nav-btn" id="btn-close-overview">Zamknij [Esc]</button>
+        </div>
+        <div class="overview-grid" id="overview-grid-content">
+            <!-- Dynamically populated -->
+        </div>
+    </div>
+
+    <!-- Presentation Engine Script -->
+    <script>
+        (function() {
+            const slides = document.querySelectorAll('.slide');
+            const totalSlides = slides.length;
+            let currentSlideIndex = 0;
+
+            const progressBar = document.getElementById('progress-bar');
+            const slideCounter = document.getElementById('slide-counter');
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+            const btnFullscreen = document.getElementById('btn-fullscreen');
+            const btnOverview = document.getElementById('btn-overview');
+            const overviewModal = document.getElementById('overview-modal');
+            const btnCloseOverview = document.getElementById('btn-close-overview');
+            const overviewGridContent = document.getElementById('overview-grid-content');
+
+            function pad(n) {
+                return n < 10 ? '0' + n : n;
+            }
+
+            function updateUI() {
+                slides.forEach((slide, index) => {
+                    if (index === currentSlideIndex) {
+                        slide.classList.add('active');
+                        slide.scrollTop = 0; // reset scroll on entry
+                    } else {
+                        slide.classList.remove('active');
+                    }
+                });
+
+                const progressPercent = ((currentSlideIndex + 1) / totalSlides) * 100;
+                progressBar.style.width = progressPercent + '%';
+
+                slideCounter.textContent = `${pad(currentSlideIndex + 1)} / ${pad(totalSlides)}`;
+
+                btnPrev.disabled = currentSlideIndex === 0;
+                btnNext.disabled = currentSlideIndex === totalSlides - 1;
+
+                history.replaceState(null, null, `#${currentSlideIndex + 1}`);
+
+                document.querySelectorAll('.overview-thumb').forEach((thumb, idx) => {
+                    if (idx === currentSlideIndex) {
+                        thumb.classList.add('active');
+                    } else {
+                        thumb.classList.remove('active');
+                    }
+                });
+            }
+
+            function goToSlide(index) {
+                if (index >= 0 && index < totalSlides) {
+                    currentSlideIndex = index;
+                    updateUI();
+                }
+            }
+
+            function nextSlide() {
+                if (currentSlideIndex < totalSlides - 1) {
+                    goToSlide(currentSlideIndex + 1);
+                }
+            }
+
+            function prevSlide() {
+                if (currentSlideIndex > 0) {
+                    goToSlide(currentSlideIndex - 1);
+                }
+            }
+
+            // Smooth scrolling to a target page/card within the current slide
+            window.scrollToElement = function(slideId, elementId) {
+                const target = document.getElementById(elementId);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            };
+
+            function scrollCurrentSlideDown() {
+                const currentSlide = slides[currentSlideIndex];
+                if (currentSlide) {
+                    const drilldown = currentSlide.querySelector('.drilldown-page');
+                    if (drilldown && currentSlide.scrollTop < 100) {
+                        drilldown.scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                        currentSlide.scrollBy({ top: 350, behavior: 'smooth' });
+                    }
+                }
+            }
+
+            function scrollCurrentSlideUp() {
+                const currentSlide = slides[currentSlideIndex];
+                if (currentSlide) {
+                    const mainPage = currentSlide.querySelector('.slide-page');
+                    if (mainPage && currentSlide.scrollTop > 100) {
+                        mainPage.scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                        currentSlide.scrollBy({ top: -350, behavior: 'smooth' });
+                    }
+                }
+            }
+
+            function toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.error('Błąd pełnego ekranu:', err);
+                    });
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    }
+                }
+            }
+
+            function toggleOverview() {
+                const isOpen = overviewModal.classList.contains('open');
+                if (isOpen) {
+                    overviewModal.classList.remove('open');
+                } else {
+                    overviewModal.classList.add('open');
+                }
+            }
+
+            slides.forEach((slide, idx) => {
+                const title = slide.getAttribute('data-title') || `Slajd ${idx + 1}`;
+                const thumb = document.createElement('div');
+                thumb.className = `overview-thumb ${idx === currentSlideIndex ? 'active' : ''}`;
+                thumb.innerHTML = `
+                    <span class="thumb-num">Slajd ${pad(idx + 1)}</span>
+                    <h4 class="thumb-title">${title}</h4>
+                `;
+                thumb.addEventListener('click', () => {
+                    goToSlide(idx);
+                    overviewModal.classList.remove('open');
+                });
+                overviewGridContent.appendChild(thumb);
+            });
+
+            btnPrev.addEventListener('click', prevSlide);
+            btnNext.addEventListener('click', nextSlide);
+            btnFullscreen.addEventListener('click', toggleFullscreen);
+            btnOverview.addEventListener('click', toggleOverview);
+            btnCloseOverview.addEventListener('click', toggleOverview);
+
+            window.addEventListener('keydown', (e) => {
+                if (overviewModal.classList.contains('open')) {
+                    if (e.key === 'Escape' || e.key === 'o' || e.key === 'O') {
+                        e.preventDefault();
+                        toggleOverview();
+                        return;
+                    }
+                }
+
+                switch (e.key) {
+                    case 'ArrowRight':
+                    case 'PageDown':
+                    case ' ':
+                    case 'l':
+                    case 'j':
+                        e.preventDefault();
+                        nextSlide();
+                        break;
+                    case 'ArrowLeft':
+                    case 'PageUp':
+                    case 'h':
+                    case 'k':
+                        e.preventDefault();
+                        prevSlide();
+                        break;
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        scrollCurrentSlideDown();
+                        break;
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        scrollCurrentSlideUp();
+                        break;
+                    case 'Home':
+                        e.preventDefault();
+                        goToSlide(0);
+                        break;
+                    case 'End':
+                        e.preventDefault();
+                        goToSlide(totalSlides - 1);
+                        break;
+                    case 'f':
+                    case 'F':
+                        e.preventDefault();
+                        toggleFullscreen();
+                        break;
+                    case 'o':
+                    case 'O':
+                        e.preventDefault();
+                        toggleOverview();
+                        break;
+                    case 'Escape':
+                        if (overviewModal.classList.contains('open')) {
+                            toggleOverview();
+                        }
+                        break;
+                }
+            });
+
+            // Lista Grozy Filtering & Search
+            let activeGrozyCat = 'all';
+            window.filterGrozy = function(category) {
+                activeGrozyCat = category;
+                document.querySelectorAll('.grozy-pill').forEach(btn => {
+                    btn.classList.toggle('active', btn.getAttribute('data-cat') === category);
+                });
+                window.applyGrozyFilter();
+            };
+
+            window.applyGrozyFilter = function() {
+                const searchEl = document.getElementById('grozy-search');
+                const query = (searchEl ? searchEl.value : '').toLowerCase().trim();
+                const rows = document.querySelectorAll('.grozy-row');
+                let count = 0;
+                rows.forEach(row => {
+                    const cat = row.getAttribute('data-cat') || '';
+                    const text = row.innerText.toLowerCase();
+                    const matchesCat = (activeGrozyCat === 'all' || cat === activeGrozyCat);
+                    const matchesQuery = !query || text.includes(query);
+                    if (matchesCat && matchesQuery) {
+                        row.style.display = '';
+                        count++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+                const counter = document.getElementById('grozy-counter');
+                if (counter) {
+                    counter.textContent = `Widoczne: ${count} z ${rows.length}`;
+                }
+            };
+
+            updateUI();
+        })();
+    </script>
+</body>
+</html>

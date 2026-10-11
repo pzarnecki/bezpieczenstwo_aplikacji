@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bezpieczeństwo Aplikacji – Uniwersytet WSB Merito</title>
+    <meta http-equiv="refresh" content="2; url=wyklad_01/prezentacja/index.html">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #070a12;
+            --bg-card: #0f172a;
+            --border: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --merito-blue: #006efa;
+            --accent-cyan: #38bdf8;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg-main);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+        }
+        .container {
+            max-width: 740px;
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px 36px;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+        }
+        .logo { max-width: 190px; height: auto; margin-bottom: 22px; }
+        h1 {
+            font-size: 2.3rem;
+            font-weight: 900;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ffffff 40%, var(--accent-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        p.subtitle {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+        }
+        .lecture-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .lecture-card {
+            background: rgba(0, 110, 250, 0.08);
+            border: 1px solid rgba(0, 110, 250, 0.3);
+            border-radius: 12px;
+            padding: 22px;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.2s ease;
+        }
+        .lecture-card:hover {
+            border-color: var(--merito-blue);
+            background: rgba(0, 110, 250, 0.12);
+            transform: translateY(-2px);
+        }
+        .lecture-info h3 {
+            font-size: 1.12rem;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+        .lecture-info p {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        .btn-launch {
+            background: var(--merito-blue);
+            color: white;
+            text-decoration: none;
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-launch:hover {
+            background: #2563eb;
+            box-shadow: 0 4px 18px rgba(0, 110, 250, 0.45);
+        }
+        .redirect-note {
+            font-size: 0.82rem;
+            color: var(--accent-cyan);
+            margin-top: 10px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .meta {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 26px;
+            border-top: 1px solid var(--border);
+            padding-top: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="wyklad_01/obrazy/logo_merito.png" alt="Uniwersytet WSB Merito" class="logo">
+        <h1>Bezpieczeństwo Aplikacji</h1>
+        <p class="subtitle">Interaktywne materiały wykładowe i prezentacje – Semestr zimowy 2026/2027</p>
+
+        <div class="lecture-list">
+            <div class="lecture-card">
+                <div class="lecture-info">
+                    <h3>Wykład 1: Krajobraz zagrożeń, anatomia podatności i automatyzacja testów</h3>
+                    <p>Anatomia podatności (w tym incydent ekspresu Keurig 1 TB), OWASP Top 10:2025, modelowanie STRIDE, triada SAST/DAST/SCA oraz Lista Grozy (50 aplikacji).</p>
+                </div>
+                <a href="wyklad_01/prezentacja/index.html" class="btn-launch">Otwórz slajdy ↗</a>
+            </div>
+        </div>
+
+        <p class="redirect-note">⏳ Automatyczne przekierowanie do slajdów za 2 sekundy...</p>
+
+        <div class="meta">
+            Prowadzący: <strong>mgr Przemysław Żarnecki</strong> | Uniwersytet WSB Merito we Wrocławiu
+        </div>
+    </div>
+</body>
+</html>
