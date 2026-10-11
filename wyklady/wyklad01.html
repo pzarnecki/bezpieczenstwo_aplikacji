@@ -1043,7 +1043,7 @@
                 <div class="slide-header">
                     <span class="slide-tag">Wprowadzenie do rzeczywistości</span>
                     <h2 class="slide-title">„Kochanie, czy nasz ekspres do kawy właśnie pinguje Chiny?”</h2>
-                    <p class="slide-subtitle">Prawdziwy incydent z października 2026 roku: kiedy AGD zaczyna żyć własnym życiem sieciowym</p>
+                    <p class="slide-subtitle">Prawdziwy incydent opisany przez ITHardware: kiedy domowe AGD zaczyna żyć własnym życiem sieciowym</p>
                 </div>
                 <div class="slide-content">
                     <div class="grid-2">
@@ -1459,7 +1459,7 @@
 
                     <div class="card card-primary" style="padding: 12px 18px; margin-top: 4px;">
                         <div class="card-body" style="font-size: 0.88rem;">
-                            <strong>Ważna obserwacja:</strong> Dlaczego <code>A05 Injection</code> spadło, a <code>A01 Broken Access Control</code> dominuje? ORM-y automatycznie parametryzują zapytania SQL, ale żaden ORM nie wie sam z siebie, czy użytkownik ma prawo do edycji danego wiersza.
+                            <strong>Ważna obserwacja:</strong> Dlaczego <code>A05 Injection</code> spadło, a <code>A01 Broken Access Control</code> dominuje? ORM-y automatycznie parametryzują zapytania SQL, ale żaden ORM nie wie sam z siebie, czy użytkownik ma prawo do edycji danego wiersza.<br><br><strong>Uwaga metodyczna:</strong> Pełna lista OWASP Top 10:2025 liczy 10 kategorii. Kategorie A06–A10 są w całości rozpisane i omówione w sekcji szczegółowej poniżej (przewiń w dół lub kliknij wiersz tabeli).
                         </div>
                     </div>
                 </div>
@@ -1482,7 +1482,7 @@
                         <div class="card-title"><span class="badge badge-red">A01</span> Broken Access Control & SSRF</div>
                         <div class="card-body">
                             <strong>Mechanizm ataku:</strong> Zalogowany klient 104 wysyła żądanie <code>GET /api/faktury/105</code>. Aplikacja pobiera fakturę bez walidacji relacji do sesji (IDOR/BOLA). Atak SSRF wymusza na serwerze odpytanie instancji metadanych chmury <code>http://169.254.169.254/latest/meta-data/</code> i wyciek tokenów IAM.<br>
-                            <strong>Obrona:</strong> Wymuszenie autoryzacji na poziomie bazy: <code>WHERE id = :id AND user_id = :user_id</code> oraz blokowanie ruchu wychodzącego do sieci prywatnych.
+                            <strong>Obrona:</strong> Wymuszenie autoryzacji na poziomie bazy: <code>WHERE id = :id AND user_id = :user_id</code> (scenariusz ten rozwiązujemy praktycznie w Zadaniu 8 projektu KrasnalShop) oraz blokowanie ruchu wychodzącego do sieci prywatnych.
                         </div>
                     </div>
                     <!-- A02 -->
