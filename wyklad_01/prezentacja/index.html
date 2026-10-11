@@ -723,6 +723,60 @@
             color: var(--text-primary);
         }
 
+        /* Moodle playful notice */
+        .moodle-badge {
+            margin-top: 18px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 22px;
+            border-radius: 30px;
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px dashed rgba(245, 158, 11, 0.45);
+            font-size: 0.82rem;
+            color: #fcd34d;
+            font-family: var(--font-sans);
+            transition: all 0.3s ease;
+            animation: moodlePulse 4s ease-in-out infinite alternate;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .moodle-badge:hover {
+            background: rgba(245, 158, 11, 0.15);
+            border-color: #f59e0b;
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+        }
+
+        .moodle-icon {
+            font-size: 1.15rem;
+            display: inline-block;
+            animation: moodleBounce 2.5s ease-in-out infinite;
+        }
+
+        .moodle-sub {
+            color: #94a3b8;
+            font-style: italic;
+        }
+
+        @keyframes moodlePulse {
+            0% {
+                border-color: rgba(245, 158, 11, 0.25);
+                box-shadow: 0 0 0 rgba(245, 158, 11, 0);
+            }
+            100% {
+                border-color: rgba(245, 158, 11, 0.7);
+                box-shadow: 0 0 16px rgba(245, 158, 11, 0.25);
+            }
+        }
+
+        @keyframes moodleBounce {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            20% { transform: translateY(-3px) rotate(-8deg); }
+            40% { transform: translateY(0) rotate(8deg); }
+            60% { transform: translateY(-2px) rotate(0deg); }
+        }
+
         /* Bottom Controls Bar */
         #bottom-bar {
             height: 60px;
@@ -906,9 +960,16 @@
                     </div>
                 </div>
 
-                <div style="margin-top: 24px; font-family: var(--font-mono); font-size: 0.84rem; display: flex; flex-direction: column; gap: 6px; align-items: center;">
+                <div style="margin-top: 20px; font-family: var(--font-mono); font-size: 0.84rem; display: flex; flex-direction: column; gap: 6px; align-items: center;">
                     <div>📦 Repozytorium Git: <span style="color: var(--accent-cyan); font-weight: 600;">https://dev.zarnecki.org/Merito/bezpieczenstwo_aplikacji.git</span></div>
                     <div>☁️ Chmura Nextcloud: <a href="https://chmura.zarnecki.org/s/iLdT3J5YGTTYCPr" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600;">https://chmura.zarnecki.org/s/iLdT3J5YGTTYCPr ↗</a></div>
+                    <div>🌐 GitHub Pages: <a href="https://pzarnecki.github.io/bezpieczenstwo_aplikacji/" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600;">https://pzarnecki.github.io/bezpieczenstwo_aplikacji/ ↗</a></div>
+                </div>
+
+                <!-- Wesoły komunikat o Moodle z animacją -->
+                <div class="moodle-badge" title="Moodle uczelniany – oficjalne źródło prawdy!">
+                    <span class="moodle-icon">🎓</span>
+                    <span>Oficjalnie: Wszystko znajdziecie oczywiście na <strong>Moodle</strong> <span class="moodle-sub">(o ile serwer akurat nie ma przerwy technicznej ☕😉)</span></span>
                 </div>
             </div>
         </section>
@@ -1889,7 +1950,7 @@ jobs:
                             </div>
                             <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 8px 16px; border-radius: 6px;">
                                 <span>🌐 <strong>GitHub Pages (Strona kursu):</strong></span>
-                                <span style="color: var(--text-muted); font-style: italic;">W przygotowaniu (link zostanie udostępniony wkrótce)</span>
+                                <a href="https://pzarnecki.github.io/bezpieczenstwo_aplikacji/" target="_blank" style="color: var(--accent-cyan); text-decoration: none; font-family: var(--font-mono); font-weight: 600;">https://pzarnecki.github.io/bezpieczenstwo_aplikacji/ ↗</a>
                             </div>
                         </div>
                     </div>
@@ -1906,7 +1967,7 @@ jobs:
             <span>|</span>
             <span>Bezpieczeństwo Aplikacji</span>
             <span>|</span>
-            <span style="color: var(--text-secondary);">Wykład 1 (mgr Przemysław Żarnecki)</span>
+            <span style="color: var(--text-secondary);">Wykład 1</span>
         </div>
 
         <div class="bar-center">
