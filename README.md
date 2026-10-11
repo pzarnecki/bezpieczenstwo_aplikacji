@@ -12,12 +12,12 @@ Prezentacje działają w 100% lokalnie i offline w każdej nowoczesnej przegląd
 
 ## Dostęp online (GitHub Pages)
 Materiały są publikowane pod adresem:  
-👉 **[https://pzarnecki.github.io/bezpieczenstwo_aplikacji/](https://pzarnecki.github.io/bezpieczenstwo_aplikacji/)**
+**[https://pzarnecki.github.io/bezpieczenstwo_aplikacji/](https://pzarnecki.github.io/bezpieczenstwo_aplikacji/)**
 
 ## Spis wykładów
 1. **Wykład 1: Krajobraz zagrożeń, anatomia podatności i automatyzacja testów bezpieczeństwa**
    * [Otwórz prezentację w przeglądarce](wyklad_01/prezentacja/index.html)
-   * [Skrypt akademicki (PDF)](wyklad_01/skrypt/wyklad_01_skrypt.pdf)
+   * Skrypt akademicki: w opracowaniu (zostanie udostępniony po zakończeniu cyklu wykładów)
    * Zawiera m.in.: analizę incydentu Keurig (1 TB danych), przegląd OWASP Top 10:2025, modelowanie zagrożeń STRIDE, automatyzację SAST/DAST/SCA oraz interaktywną **Listę Grozy: 50 spektakularnych kompromitacji oprogramowania (2020–2026)** z dynamicznym filtrowaniem.
 
 ## Sterowanie w prezentacji
